@@ -105,7 +105,7 @@ def load_custom_allreduce_data(custom_allreduce_file):
 
         try:
             latency = custom_allreduce_data[dtype][tp_size][allreduce_strategy][message_size]
-            logger.debug('value conflict in custom allreduce data: {} {} {} {} {} {}'.format(dtype, tp_size, allreduce_strategy, message_size, latency))
+            logger.debug('value conflict in custom allreduce data: {} {} {} {} {}'.format(dtype, tp_size, allreduce_strategy, message_size, latency))
         except KeyError:
             custom_allreduce_data[dtype][tp_size][allreduce_strategy][message_size] = latency
 
@@ -574,7 +574,7 @@ class PerfDatabase(object):
             for y in target_y_list:
                 if y not in data_dict[x].keys():
                     y_left, y_right = self._nearest_1d_point_helper(y, list(data_dict[x].keys()), False)
-                    z_list = sorted(list(data_dict[x][y_left].keys()))
+                    z_list = sorted(list(set(data_dict[x][y_left].keys()) & set(data_dict[x][y_right].keys())))
                     for z in z_list:
                         y_left_value = data_dict[x][y_left][z]
                         y_right_value = data_dict[x][y_right][z]
@@ -594,8 +594,8 @@ class PerfDatabase(object):
         for x in target_x_list:
             if x not in data_dict.keys():
                 x_left, x_right = self._nearest_1d_point_helper(x, list(data_dict.keys()), False)
-                for y in sorted(data_dict[x_left].keys()):
-                    for z in sorted(data_dict[x_left][y].keys()):
+                for y in sorted(set(data_dict[x_left].keys()) & set(data_dict[x_right].keys())):
+                    for z in sorted(set(data_dict[x_left][y].keys()) & set(data_dict[x_right][y].keys())):
                         x_left_value = data_dict[x_left][y][z]
                         x_right_value = data_dict[x_right][y][z]
                         assert(x_right_value is not None), "x_right_value cannot be None"
@@ -946,6 +946,12 @@ class PerfDatabase(object):
         else:
             if tp_size == 1:
                 return 0.
+            if (quant_mode not in self._custom_allreduce_data or 
+                min(tp_size,8) not in self._custom_allreduce_data[quant_mode] or
+                'AUTO' not in self._custom_allreduce_data[quant_mode][min(tp_size,8)] or
+                not self._custom_allreduce_data[quant_mode][min(tp_size,8)]['AUTO']):
+                # Fallback to SOL mode if no AllReduce data available
+                return self.query_allreduce(quant_mode, tp_size, size, sol_mode=common.SOLMode.SOL)
             comm_dict = self._custom_allreduce_data[quant_mode][min(tp_size,8)]['AUTO'] # use AUTO for allreduce strategy
             size_left, size_right = self._nearest_1d_point_helper(size, list(comm_dict.keys()), inner_only=False)
             lat = self._interp_1d([size_left, size_right], [comm_dict[size_left], comm_dict[size_right]], size)
@@ -993,6 +999,9 @@ class PerfDatabase(object):
             if num_gpus == 1:
                 return 0.
 
+        if not self._nccl_data[dtype][operation]:
+            # Fallback to SOL mode if no NCCL data available
+            return self.query_nccl(dtype, num_gpus, operation, message_size, sol_mode=common.SOLMode.SOL)
         max_num_gpus = max(self._nccl_data[dtype][operation].keys())
         nccl_dict = self._nccl_data[dtype][operation][min(num_gpus,max_num_gpus)]
         size_left, size_right = self._nearest_1d_point_helper(message_size, list(nccl_dict.keys()), inner_only=False)
@@ -1065,6 +1074,9 @@ class PerfDatabase(object):
             else:
                 moe_dict = self._moe_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
 
+            if not moe_dict or len(moe_dict.keys()) < 2:
+                # Fallback to SOL mode if insufficient MoE data
+                return self.query_moe(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution, sol_mode=common.SOLMode.SOL)
             num_left, num_right = self._nearest_1d_point_helper(num_tokens, list(moe_dict.keys()), inner_only=False)
             lat = self._interp_1d([num_left, num_right], [moe_dict[num_left], moe_dict[num_right]], num_tokens)
             return lat
@@ -1097,7 +1109,14 @@ class PerfDatabase(object):
         else:
             if quant_mode not in self._mla_bmm_data:
                 quant_mode = common.GEMMQuantMode.float16
-            mla_bmm_dict = self._mla_bmm_data[quant_mode]['mla_gen_pre' if if_pre else 'mla_gen_post'][num_heads]
+            op_name = 'bmm_pre' if if_pre else 'bmm_post'
+            if op_name not in self._mla_bmm_data[quant_mode] or num_heads not in self._mla_bmm_data[quant_mode][op_name]:
+                # Fallback to SOL mode if specific MLA BMM data not available
+                return self.query_mla_bmm(num_tokens, num_heads, quant_mode, if_pre, sol_mode=common.SOLMode.SOL)
+            mla_bmm_dict = self._mla_bmm_data[quant_mode][op_name][num_heads]
+            if not mla_bmm_dict or len(mla_bmm_dict.keys()) < 2:
+                # Fallback to SOL mode if insufficient MLA BMM data
+                return self.query_mla_bmm(num_tokens, num_heads, quant_mode, if_pre, sol_mode=common.SOLMode.SOL)
             num_left, num_right = self._nearest_1d_point_helper(num_tokens, list(mla_bmm_dict.keys()), inner_only=False)
             lat = self._interp_1d([num_left, num_right], [mla_bmm_dict[num_left], mla_bmm_dict[num_right]], num_tokens)
             return lat

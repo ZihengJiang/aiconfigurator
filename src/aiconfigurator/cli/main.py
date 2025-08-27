@@ -966,7 +966,7 @@ def configure_parser(parser):
     Configures the argument parser for the CLI.
     """
     parser.add_argument("--model", choices=common.SupportedModels.keys(), type=str, required=True, help="Model name") 
-    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm'], type=str, required=True, help="System name")    
+    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm', 'gb200_sxm', 'gb200_nvl72'], type=str, required=True, help="System name")    
     parser.add_argument("--total_gpus", type=int, required=True, help="Total GPUs, no less than 2 as disagg deployment requires at least 2 gpus")
     # optional args, dedault according to templates
     parser.add_argument("--backend", choices=[backend.value for backend in common.BackendName], type=str, default=common.BackendName.trtllm.value, help="Backend name, suport trtllm for now")

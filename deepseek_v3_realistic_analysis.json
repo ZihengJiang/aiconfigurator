@@ -1,0 +1,107 @@
+{
+  "model": "DeepSeek V3",
+  "system": "GB200 NVL72",
+  "quantization": "FP8",
+  "analysis_type": "Realistic Roofline Estimation",
+  "sla_requirements": {
+    "ttft_ms": 300,
+    "tpot_ms": 20,
+    "input_seq_len": 4000,
+    "output_seq_len": 1000
+  },
+  "results": {
+    "colocation": [
+      {
+        "config": "TP=8, Workers=9",
+        "ttft_ms": 50.41113538918066,
+        "tpot_ms": 1.887859905804312,
+        "requests_per_sec": 18.573253809659644,
+        "tokens_per_sec_per_gpu": 257.96185846749506,
+        "total_tokens_per_sec": 18573.253809659644,
+        "meets_sla": true
+      },
+      {
+        "config": "TP=16, Workers=4",
+        "ttft_ms": 95.4399798336251,
+        "tpot_ms": 2.557107900497513,
+        "requests_per_sec": 12.063872715468266,
+        "tokens_per_sec_per_gpu": 167.55378771483703,
+        "total_tokens_per_sec": 12063.872715468266,
+        "meets_sla": true
+      },
+      {
+        "config": "TP=24, Workers=3",
+        "ttft_ms": 140.21565140350944,
+        "tpot_ms": 2.9731830206306187,
+        "requests_per_sec": 11.562926496811128,
+        "tokens_per_sec_per_gpu": 160.596201344599,
+        "total_tokens_per_sec": 11562.926496811127,
+        "meets_sla": true
+      },
+      {
+        "config": "TP=36, Workers=2",
+        "ttft_ms": 184.52884620175647,
+        "tpot_ms": 3.38941237286249,
+        "requests_per_sec": 8.953700701428565,
+        "tokens_per_sec_per_gpu": 124.35695418650783,
+        "total_tokens_per_sec": 8953.700701428565,
+        "meets_sla": true
+      }
+    ],
+    "disaggregation": [
+      {
+        "config": "P:24+D:48 (TP8+TP8)",
+        "ttft_ms": 21.359122222222222,
+        "tpot_ms": 2.2948792464344945,
+        "system_throughput": 83.73751051153982,
+        "tokens_per_sec_per_gpu": 1163.0209793269419,
+        "total_tokens_per_sec": 83737.51051153982,
+        "bottleneck": "decode",
+        "meets_sla": true
+      },
+      {
+        "config": "P:32+D:40 (TP8+TP8)",
+        "ttft_ms": 21.359122222222222,
+        "tpot_ms": 2.2948792464344945,
+        "system_throughput": 69.78125875961652,
+        "tokens_per_sec_per_gpu": 969.1841494391184,
+        "total_tokens_per_sec": 69781.25875961652,
+        "bottleneck": "decode",
+        "meets_sla": true
+      },
+      {
+        "config": "P:36+D:36 (TP12+TP12)",
+        "ttft_ms": 19.574478977291758,
+        "tpot_ms": 2.655407942244769,
+        "system_throughput": 36.17988718266385,
+        "tokens_per_sec_per_gpu": 502.49843309255346,
+        "total_tokens_per_sec": 36179.88718266385,
+        "bottleneck": "decode",
+        "meets_sla": true
+      }
+    ],
+    "best_colocation": {
+      "config": "TP=8, Workers=9",
+      "ttft_ms": 50.41113538918066,
+      "tpot_ms": 1.887859905804312,
+      "requests_per_sec": 18.573253809659644,
+      "tokens_per_sec_per_gpu": 257.96185846749506,
+      "total_tokens_per_sec": 18573.253809659644,
+      "meets_sla": true
+    },
+    "best_disaggregation": {
+      "config": "P:24+D:48 (TP8+TP8)",
+      "ttft_ms": 21.359122222222222,
+      "tpot_ms": 2.2948792464344945,
+      "system_throughput": 83.73751051153982,
+      "tokens_per_sec_per_gpu": 1163.0209793269419,
+      "total_tokens_per_sec": 83737.51051153982,
+      "bottleneck": "decode",
+      "meets_sla": true
+    }
+  },
+  "insights": {
+    "colocation_sla_configs": 4,
+    "disaggregation_sla_configs": 3
+  }
+}
