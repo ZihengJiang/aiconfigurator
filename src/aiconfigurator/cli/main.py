@@ -891,7 +891,15 @@ def load_config_from_yaml(model_name: str,
         if not check_is_moe(model_name):
             yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'dense_default.yaml')
         elif get_model_family(model_name) == 'DEEPSEEK':
-            yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
+            # Use system-specific template for GB200 NVL72
+            if system_name == 'gb200_nvl72':
+                system_template = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_v3_gb200_nvl72.yaml')
+                if os.path.exists(system_template):
+                    yaml_path = system_template
+                else:
+                    yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
+            else:
+                yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
         else:
             yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'moe_default.yaml')
 
@@ -966,7 +974,7 @@ def configure_parser(parser):
     Configures the argument parser for the CLI.
     """
     parser.add_argument("--model", choices=common.SupportedModels.keys(), type=str, required=True, help="Model name") 
-    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm'], type=str, required=True, help="System name")    
+    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm', 'gb200_sxm', 'gb200_nvl72'], type=str, required=True, help="System name")    
     parser.add_argument("--total_gpus", type=int, required=True, help="Total GPUs, no less than 2 as disagg deployment requires at least 2 gpus")
     # optional args, dedault according to templates
     parser.add_argument("--backend", choices=[backend.value for backend in common.BackendName], type=str, default=common.BackendName.trtllm.value, help="Backend name, suport trtllm for now")
