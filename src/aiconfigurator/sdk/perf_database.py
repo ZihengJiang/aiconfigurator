@@ -573,6 +573,7 @@ class PerfDatabase(object):
             # y_direction
             for y in target_y_list:
                 if y not in data_dict[x].keys():
+                    print(f"DEBUG: y_direction extrapolation for x={x}, y={y}, available_y_values={list(data_dict[x].keys())}")
                     y_left, y_right = self._nearest_1d_point_helper(y, list(data_dict[x].keys()), False)
                     z_list = sorted(list(set(data_dict[x][y_left].keys()) & set(data_dict[x][y_right].keys())))
                     for z in z_list:
@@ -611,7 +612,7 @@ class PerfDatabase(object):
         """
         Find the nearest 1d point
         """
-        assert(values is not None and len(values) >= 2), f"values is None or len(values) < 2"
+        assert(values is not None and len(values) >= 2), f"values is None or len(values) < 2. x={x}, values={values}"
         sorted_values = sorted(values)
 
         if x < sorted_values[0]:

@@ -74,9 +74,9 @@ class MLAEstimator(RooflineEstimator):
             f.write("mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,latency\n")
             
             # DeepSeek V3 MLA configuration
-            seq_lens = [512, 1024, 2048, 4096, 8192, 16384, 32768]
-            batch_sizes = [1, 4, 8, 16, 32]
-            tp_sizes = [1, 2, 4, 8, 16, 32, 72]
+            seq_lens = [128, 256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 10240, 12288, 16384, 20480, 24576, 32768]
+            batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128]
+            tp_sizes = [1, 2, 4, 8, 16, 32, 64, 72]
             
             for seq_len in seq_lens:
                 for batch_size in batch_sizes:
@@ -98,10 +98,10 @@ class MLAEstimator(RooflineEstimator):
             # CSV header: mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,step,latency
             f.write("mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,step,latency\n")
             
-            seq_lens = [1, 512, 1024, 2048, 4096, 8192]  # KV cache length
-            batch_sizes = [1, 16, 32, 64, 128, 256, 512]
-            tp_sizes = [1, 2, 4, 8, 16, 32, 72]
-            steps = [1, 10, 100]  # Generation steps
+            seq_lens = [1, 256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 10240, 12288, 16384]  # KV cache length
+            batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+            tp_sizes = [1, 2, 4, 8, 16, 32, 64, 72]
+            steps = [1, 10, 100, 500, 1000]  # Generation steps
             
             for seq_len in seq_lens:
                 for batch_size in batch_sizes:
@@ -126,7 +126,7 @@ class MLAEstimator(RooflineEstimator):
             
             # BMM token counts for MLA operations
             token_counts = [1, 16, 32, 64, 128, 256, 512, 1024, 2048]
-            num_heads_list = [128]  # DeepSeek V3
+            num_heads_list = [32, 64, 96, 128]  # Multiple head configurations for proper interpolation
             op_names = ['bmm_pre', 'bmm_post']  # Before and after attention
             
             for num_tokens in token_counts:

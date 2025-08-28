@@ -41,7 +41,7 @@ class RooflineEstimator:
         self.p2p_latency = node.get('p2p_latency', 0.00001)  # seconds
         
     def estimate_gemm_time(self, M: int, N: int, K: int, dtype: str = 'fp16', 
-                          utilization: float = 0.85) -> float:
+                          utilization: float = None) -> float:
         """
         Estimate GEMM execution time using roofline model.
         
@@ -68,17 +68,33 @@ class RooflineEstimator:
         dtype_bytes = {'fp16': 2, 'fp8': 1, 'int8': 1}.get(dtype, 2)
         memory_traffic = (M * K + K * N + M * N) * dtype_bytes
         
+        # Adaptive utilization based on matrix size (from roofline analysis)
+        if utilization is None:
+            min_dim = min(M, N, K)
+            if min_dim >= 1024:
+                utilization = 0.87  # Large matrices: 85-90% utilization
+            elif min_dim >= 256:
+                utilization = 0.77  # Medium matrices: 70-85% utilization
+            else:
+                utilization = 0.60  # Small matrices: 50-70% utilization
+        
         # Roofline: limited by either compute or memory bandwidth
         compute_time = flops / (peak_flops * utilization)
-        memory_time = memory_traffic / (self.mem_bw * self.mem_bw_scaling)
+        memory_time = memory_traffic / (self.mem_bw * 0.8)  # 80% memory bandwidth utilization
         
-        # Add constant latency overhead
-        estimated_time = max(compute_time, memory_time) + self.mem_latency
+        # Add system-level overhead modeling (from roofline analysis)
+        base_time = max(compute_time, memory_time)
+        kernel_launch_overhead = 5e-6  # 5μs per kernel launch
+        sync_overhead = 1.05  # 5% synchronization overhead
+        memory_fragmentation = 1.02  # 2% memory fragmentation overhead
+        
+        estimated_time = (base_time * sync_overhead * memory_fragmentation + 
+                         kernel_launch_overhead + self.mem_latency)
         
         return estimated_time
     
     def estimate_allreduce_time(self, message_size_bytes: int, num_gpus: int, 
-                               utilization: float = 0.7) -> float:
+                               utilization: float = None) -> float:
         """
         Estimate AllReduce communication time.
         
@@ -97,8 +113,18 @@ class RooflineEstimator:
         # Where P is number of participants
         ring_factor = 2 * (num_gpus - 1) / num_gpus
         
-        # Use intra-node bandwidth (assuming single node or optimized multi-node)
-        bandwidth = self.intra_node_bw * utilization
+        # Adaptive network utilization based on GPU count
+        if utilization is None:
+            if num_gpus <= 72:  # Intra-node NVLink
+                utilization = 0.8  # NVLink can achieve higher utilization
+            else:  # Inter-node InfiniBand
+                utilization = 0.7  # Lower utilization for inter-node
+        
+        # Use intra-node bandwidth if within single node, else inter-node
+        if num_gpus <= 72:
+            bandwidth = self.intra_node_bw * utilization
+        else:
+            bandwidth = self.inter_node_bw * utilization
         
         transfer_time = ring_factor * message_size_bytes / bandwidth
         
@@ -109,7 +135,7 @@ class RooflineEstimator:
     
     def estimate_attention_time(self, seq_len: int, num_heads: int, head_dim: int,
                                batch_size: int = 1, dtype: str = 'fp16',
-                               is_context: bool = True, utilization: float = 0.8) -> float:
+                               is_context: bool = True, utilization: float = None) -> float:
         """
         Estimate attention computation time.
         
@@ -134,6 +160,13 @@ class RooflineEstimator:
             
         total_flops = flops_per_head * num_heads
         
+        # Adaptive utilization for attention operations (from roofline analysis)
+        if utilization is None:
+            if is_context:
+                utilization = 0.68  # Context attention: 60-75% utilization
+            else:
+                utilization = 0.75  # Generation attention: 70-80% utilization
+        
         # Get compute throughput
         if dtype == 'fp8':
             peak_flops = self.fp8_flops
@@ -149,13 +182,18 @@ class RooflineEstimator:
         else:
             memory_traffic = batch_size * num_heads * seq_len * head_dim * 2 * dtype_bytes  # K, V cache access
             
-        memory_time = memory_traffic / (self.mem_bw * self.mem_bw_scaling)
+        memory_time = memory_traffic / (self.mem_bw * 0.8)  # 80% memory bandwidth utilization
         
-        return max(compute_time, memory_time) + self.mem_latency
+        # Add system-level overhead for attention operations
+        base_time = max(compute_time, memory_time)
+        kernel_launch_overhead = 3e-6  # 3μs per attention kernel
+        sync_overhead = 1.03 if is_context else 1.02  # Context has more sync overhead
+        
+        return base_time * sync_overhead + kernel_launch_overhead + self.mem_latency
     
     def estimate_moe_time(self, hidden_size: int, intermediate_size: int, 
                          num_experts: int, top_k: int, batch_size: int = 1,
-                         dtype: str = 'fp16', utilization: float = 0.75) -> float:
+                         dtype: str = 'fp16', utilization: float = None) -> float:
         """
         Estimate MoE (Mixture of Experts) computation time.
         
@@ -183,6 +221,10 @@ class RooflineEstimator:
         
         total_flops = router_flops + expert_flops
         
+        # Adaptive utilization for MoE operations (from roofline analysis)
+        if utilization is None:
+            utilization = 0.80  # MoE operations: 75-85% utilization
+        
         # Get compute throughput
         if dtype == 'fp8':
             peak_flops = self.fp8_flops
@@ -200,9 +242,14 @@ class RooflineEstimator:
             top_k * intermediate_size * hidden_size * 2 * dtype_bytes  # expert weights
         )
         
-        memory_time = memory_traffic / (self.mem_bw * self.mem_bw_scaling)
+        memory_time = memory_traffic / (self.mem_bw * 0.8)  # 80% memory bandwidth utilization
         
-        return max(compute_time, memory_time) + self.mem_latency
+        # Add system-level overhead for MoE operations
+        base_time = max(compute_time, memory_time)
+        kernel_launch_overhead = 8e-6  # 8μs per MoE layer (multiple expert kernels)
+        sync_overhead = 1.08  # Higher overhead due to expert routing and dispatch
+        
+        return base_time * sync_overhead + kernel_launch_overhead + self.mem_latency
 
     def generate_performance_files(self, output_dir: str):
         """
@@ -228,6 +275,9 @@ class RooflineEstimator:
         # Generate custom allreduce data
         self._generate_custom_allreduce_file(os.path.join(output_dir, "custom_allreduce_perf.txt"))
         
+        # Generate MLA performance data
+        self._generate_mla_perf_files(output_dir)
+        
         logger.info(f"Generated performance estimation files in {output_dir}")
     
     def _generate_gemm_perf_file(self, filename: str):
@@ -236,21 +286,18 @@ class RooflineEstimator:
             # Write CSV header
             f.write("gemm_dtype,m,n,k,latency\n")
             
-            # Common GEMM shapes for LLM inference
-            shapes = [
-                # Small shapes
-                (1, 4096, 4096), (1, 8192, 4096), (1, 11008, 4096),
-                (1, 4096, 11008), (1, 14336, 4096), (1, 4096, 14336),
-                # Medium batch sizes
-                (16, 4096, 4096), (32, 4096, 4096), (64, 4096, 4096),
-                (128, 4096, 4096), (256, 4096, 4096), (512, 4096, 4096),
-                # Large shapes for prefill
-                (1024, 4096, 4096), (2048, 4096, 4096), (4096, 4096, 4096),
-                # DeepSeek V3 specific shapes  
-                (1, 7168, 7168), (1, 18432, 7168), (1, 7168, 18432),
-                (32, 7168, 7168), (128, 7168, 7168), (512, 7168, 7168),
-                (1, 2048, 7168), (16, 2048, 7168), (32, 2048, 7168),
-            ]
+            # Common GEMM shapes for LLM inference - comprehensive coverage for interpolation
+            # Each M,N pair needs multiple K dimensions for proper interpolation
+            batch_sizes = [1, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]  
+            n_dimensions = [2048, 4096, 7168, 8192, 11008, 14336, 18432]
+            k_dimensions = [2048, 4096, 7168, 8192, 11008, 14336, 18432]
+            
+            shapes = []
+            # Generate comprehensive GEMM shapes
+            for M in batch_sizes:
+                for N in n_dimensions:
+                    for K in k_dimensions:
+                        shapes.append((M, N, K))
             
             # Map our dtype names to common enum names
             dtype_mapping = {
@@ -274,7 +321,7 @@ class RooflineEstimator:
             
             # Message sizes (bytes)
             sizes = [1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864]
-            gpu_counts = [2, 4, 8, 16, 32, 72]
+            gpu_counts = [2, 4, 8, 16, 32, 64, 72]
             
             for size_bytes in sizes:
                 for num_gpus in gpu_counts:
@@ -293,9 +340,9 @@ class RooflineEstimator:
             # CSV header: attn_dtype,kv_cache_dtype,batch_size,isl,num_heads,num_key_value_heads,latency
             f.write("attn_dtype,kv_cache_dtype,batch_size,isl,num_heads,num_key_value_heads,latency\n")
             
-            seq_lens = [512, 1024, 2048, 4096, 8192, 16384, 32768]
-            head_configs = [(32, 32), (40, 40), (64, 8), (128, 128)]  # (num_heads, num_kv_heads)
-            batch_sizes = [1, 4, 8, 16, 32]
+            seq_lens = [128, 256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 10240, 12288, 16384, 20480, 24576, 32768]
+            head_configs = [(64, 64), (96, 96), (128, 128), (160, 160)]  # Multiple configurations for interpolation
+            batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128]
             
             for seq_len in seq_lens:
                 for num_heads, num_kv_heads in head_configs:
@@ -315,8 +362,8 @@ class RooflineEstimator:
             # CSV header: attn_dtype,kv_cache_dtype,batch_size,isl,num_heads,num_key_value_heads,step,latency
             f.write("attn_dtype,kv_cache_dtype,batch_size,isl,num_heads,num_key_value_heads,step,latency\n")
             
-            seq_lens = [1, 512, 1024, 2048, 4096, 8192]  # KV cache length
-            steps = [1, 10, 100]  # Generation steps
+            seq_lens = [1, 64, 128, 256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 10240, 12288, 16384, 20480, 24576]  # KV cache length  
+            steps = [1, 10, 100, 500, 1000]  # Generation steps
             
             for seq_len in seq_lens:
                 for num_heads, num_kv_heads in head_configs:
@@ -340,8 +387,11 @@ class RooflineEstimator:
             
             # DeepSeek V3 MoE configs
             configs = [
+                (4096, 2048, 256, 8),  # Small config
+                (5120, 3072, 128, 8),  # Medium config
                 (7168, 2048, 256, 8),  # DeepSeek V3 standard config
                 (7168, 18432, 3, 3),   # DeepSeek V3 dense layers
+                (8192, 4096, 512, 8),  # Large config
             ]
             
             batch_sizes = [1, 16, 32, 64, 128, 256]
@@ -375,7 +425,7 @@ class RooflineEstimator:
             # Format: dtype,tp_size,message_size,allreduce_strategy,layer_name,latency
             
             sizes = [4096, 16384, 65536, 262144, 1048576, 4194304]
-            gpu_counts = [2, 4, 8, 16, 32, 72]
+            gpu_counts = [2, 4, 8, 16, 32, 64, 72]
             strategies = ['NCCL', 'ONESHOT', 'TWOSHOT']
             
             for size_bytes in sizes:
@@ -395,3 +445,78 @@ class RooflineEstimator:
                             time_us = time_sec * 1e6
                             # Format: dtype,tp_size,message_size,allreduce_strategy,layer_name,latency
                             f.write(f"half,{num_gpus},{size_bytes},{strategy},ar_layer,{time_us:.4f}\n")
+    
+    def _generate_mla_perf_files(self, output_dir: str):
+        """Generate Multi-head Latent Attention performance files."""
+        
+        # Context MLA
+        with open(os.path.join(output_dir, "context_mla_perf.txt"), 'w') as f:
+            # CSV header: mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,latency
+            f.write("mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,latency\n")
+            
+            seq_lens = [128, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384, 24576, 32768]
+            tp_sizes = [1, 2, 4, 8]  # Tensor parallelism sizes
+            batch_sizes = [1, 4, 8, 16, 32, 64]
+            
+            for seq_len in seq_lens:
+                for tp_size in tp_sizes:
+                    for batch_size in batch_sizes:
+                        for mla_dtype in ['float16', 'fp8']:
+                            for kv_cache_dtype in ['float16', 'fp8']:
+                                # MLA has additional compression compared to standard attention
+                                # Use representative DeepSeek V3 head config: 128 heads, 56 head_dim
+                                time_sec = self.estimate_attention_time(
+                                    seq_len, 128, 56, batch_size, 
+                                    'fp16' if mla_dtype == 'float16' else 'fp8', 
+                                    is_context=True
+                                ) * 0.8 / tp_size  # MLA is ~20% more efficient, scale by TP
+                                time_sec = max(time_sec, 1e-6)  # Minimum latency
+                                time_ms = time_sec * 1000
+                                f.write(f"{mla_dtype},{kv_cache_dtype},{batch_size},{seq_len},{tp_size},{time_ms:.4f}\n")
+        
+        # Generation MLA  
+        with open(os.path.join(output_dir, "generation_mla_perf.txt"), 'w') as f:
+            # CSV header: mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,step,latency
+            f.write("mla_dtype,kv_cache_dtype,batch_size,isl,tp_size,step,latency\n")
+            
+            seq_lens = [1, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192]  # KV cache length
+            steps = [1, 10, 100]  # Generation steps
+            
+            for seq_len in seq_lens:
+                for tp_size in tp_sizes:
+                    for batch_size in [1, 16, 32, 64, 128, 256, 512, 1024]:
+                        for step in steps:
+                            for mla_dtype in ['float16', 'fp8']:
+                                for kv_cache_dtype in ['float16', 'fp8']:
+                                    time_sec = self.estimate_attention_time(
+                                        seq_len, 128, 56, batch_size,
+                                        'fp16' if mla_dtype == 'float16' else 'fp8',
+                                        is_context=False
+                                    ) * 0.8 / tp_size  # MLA is ~20% more efficient, scale by TP
+                                    time_sec = max(time_sec, 1e-6)  # Minimum latency
+                                    time_ms = time_sec * 1000
+                                    f.write(f"{mla_dtype},{kv_cache_dtype},{batch_size},{seq_len},{tp_size},{step},{time_ms:.4f}\n")
+        
+        # MLA BMM (Batch Matrix Multiplication)
+        with open(os.path.join(output_dir, "mla_bmm_perf.txt"), 'w') as f:
+            # CSV header: bmm_dtype,num_tokens,num_heads,latency,op_name
+            f.write("bmm_dtype,num_tokens,num_heads,latency,op_name\n")
+            
+            # Common configurations for MLA BMM
+            num_tokens_list = [1, 4, 16, 32, 64, 128, 256, 512, 1024, 2048]
+            num_heads_list = [32, 64, 128]  # Representative head counts
+            op_names = ['bmm_pre', 'bmm_post']  # Pre and post operations
+            
+            for num_tokens in num_tokens_list:
+                for num_heads in num_heads_list:
+                    for op_name in op_names:
+                        for dtype in ['float16', 'fp8_block']:
+                            # Estimate BMM time based on typical MLA operations
+                            # Assume each BMM is roughly (num_tokens, head_dim, head_dim) operation
+                            head_dim = 56  # DeepSeek V3 head dimension
+                            base_time = self.estimate_gemm_time(num_tokens, head_dim, head_dim, 
+                                                              'fp16' if dtype == 'float16' else 'fp8')
+                            # Scale by number of heads
+                            bmm_time = base_time * num_heads * 0.9  # Some efficiency from parallel heads
+                            time_ms = bmm_time * 1000
+                            f.write(f"{dtype},{num_tokens},{num_heads},{time_ms:.4f},{op_name}\n")

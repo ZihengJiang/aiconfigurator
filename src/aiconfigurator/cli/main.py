@@ -891,7 +891,15 @@ def load_config_from_yaml(model_name: str,
         if not check_is_moe(model_name):
             yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'dense_default.yaml')
         elif get_model_family(model_name) == 'DEEPSEEK':
-            yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
+            # Use system-specific template for GB200 NVL72
+            if system_name == 'gb200_nvl72':
+                system_template = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_v3_gb200_nvl72.yaml')
+                if os.path.exists(system_template):
+                    yaml_path = system_template
+                else:
+                    yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
+            else:
+                yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
         else:
             yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'moe_default.yaml')
 
