@@ -773,7 +773,7 @@ class AIConfigurator:
         summary_box.append("  " + "-" * 76)
 
         summary_box.append("  Deployment Details:")
-        table_buf = self._plot_worker_setup_table(aiconfigurator_result.disagg_pareto, aiconfigurator_result.agg_pareto, aiconfigurator_config.total_gpus, aiconfigurator_config.tpot, 5, aiconfigurator_config.is_moe)
+        table_buf = self._plot_worker_setup_table(aiconfigurator_result.disagg_pareto, aiconfigurator_result.agg_pareto, aiconfigurator_config.total_gpus, aiconfigurator_config.tpot, 100, aiconfigurator_config.is_moe)
         summary_box.append(table_buf)
 
         summary_box.append("*" * 80)
@@ -891,9 +891,15 @@ def load_config_from_yaml(model_name: str,
         if not check_is_moe(model_name):
             yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'dense_default.yaml')
         elif get_model_family(model_name) == 'DEEPSEEK':
-            # Use system-specific template for GB200 NVL72
+            # Use system-specific template for GB200 NVL72 and NVL8
             if system_name == 'gb200_nvl72':
                 system_template = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_v3_gb200_nvl72.yaml')
+                if os.path.exists(system_template):
+                    yaml_path = system_template
+                else:
+                    yaml_path = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_default.yaml')
+            elif system_name == 'gb200_nvl8':
+                system_template = os.path.join(os.path.dirname(__file__), 'templates', backend_name, 'deepseek_v3_gb200_nvl8.yaml')
                 if os.path.exists(system_template):
                     yaml_path = system_template
                 else:
@@ -974,7 +980,7 @@ def configure_parser(parser):
     Configures the argument parser for the CLI.
     """
     parser.add_argument("--model", choices=common.SupportedModels.keys(), type=str, required=True, help="Model name") 
-    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm', 'gb200_sxm', 'gb200_nvl72'], type=str, required=True, help="System name")    
+    parser.add_argument("--system", choices=['h100_sxm', 'h200_sxm', 'gb200_sxm', 'gb200_nvl72', 'gb200_nvl8'], type=str, required=True, help="System name")    
     parser.add_argument("--total_gpus", type=int, required=True, help="Total GPUs, no less than 2 as disagg deployment requires at least 2 gpus")
     # optional args, dedault according to templates
     parser.add_argument("--backend", choices=[backend.value for backend in common.BackendName], type=str, default=common.BackendName.trtllm.value, help="Backend name, suport trtllm for now")

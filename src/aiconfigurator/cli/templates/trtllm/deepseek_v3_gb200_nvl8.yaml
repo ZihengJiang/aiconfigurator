@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # ============================= User config section begin =============================
-# DeepSeek V3 configuration optimized for GB200 NVL72 with FP8
+# DeepSeek V3 configuration optimized for GB200 NVL8 with FP8
 # Model: DEEPSEEK_V3 (61 layers, 128 heads, 7168 hidden, 256 experts, top-8)
 nextn: 1 # mtp 1
 nextn_accept_rates: [0.85,0,0,0,0] # each position maps to the accept rate of the ith draft token
@@ -17,14 +17,14 @@ common_framework_config: &common_framework_config
   backend_name: "trtllm" # trtllm, sglang, vllm
   version: "1.0.0rc3" # based on your local database
 
-agg_system_name: &agg_system_name "gb200_nvl72" # GB200 NVL72 system
-disagg_prefill_system_name: &disagg_prefill_system_name "gb200_nvl72"
-disagg_decode_system_name: &disagg_decode_system_name "gb200_nvl72"
+agg_system_name: &agg_system_name "gb200_nvl8" # GB200 NVL8 system
+disagg_prefill_system_name: &disagg_prefill_system_name "gb200_nvl8"
+disagg_decode_system_name: &disagg_decode_system_name "gb200_nvl8"
 # ============================= User config section end =============================
 
 # ----------------------------- no need to modify below --------------------------------
 
-# Optimized search system config for DeepSeek V3 on GB200 NVL72
+# Optimized search system config for DeepSeek V3 on GB200 NVL8
 # ============================= search system config begin =============================
 # agg(colocation) config
 agg_config:
@@ -39,22 +39,22 @@ agg_config:
       fmha_quant_mode: "fp8" # FP8 attention
       comm_quant_mode: "half" # FP16 communication
     parallel_config:
-      # Optimized for 64 GPU workload with NVLink domain support
-      num_gpu_per_worker: [1, 2, 4, 8, 16, 32, 64, 128, 256]
+      # Optimized for 64 GPU workload with NVL8 domain support
+      num_gpu_per_worker: [1, 2, 4, 8, 16, 32, 64]
       tp_list: [1, 2, 4, 8]
       pp_list: [1]
-      dp_list: [1, 2, 4, 8, 16, 32, 64]
+      dp_list: [1, 2, 4, 8]
       moe_tp_list: [1, 2, 4, 8]
-      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+      moe_ep_list: [1, 2, 4, 8]
 
 # disaggregated (PD) config
 disagg_config:
   # the whole replica config, a replica is the minimum unit of disagg deployment
   replica_config:
-    num_gpu_per_replica: [1, 2, 4, 8, 16, 24, 32, 48, 64, 128, 256] # Scaled for NVL72
-    max_gpu_per_replica: 288 # 4 NVL72 nodes max per replica
-    max_prefill_worker: 64 # Up to 36 prefill workers per replica
-    max_decode_worker: 64 # Up to 36 decode workers per replica
+    num_gpu_per_replica: [1, 2, 4, 8, 16, 32, 64] # Scaled for NVL8
+    max_gpu_per_replica: 64 # 8 NVL8 nodes max per replica
+    max_prefill_worker: 32 # Up to 32 prefill workers per replica
+    max_decode_worker: 32 # Up to 32 decode workers per replica
     
   # each prefill worker config
   prefill_worker_config:
@@ -73,7 +73,7 @@ disagg_config:
       pp_list: [1]
       dp_list: [1] # No attention DP for prefill
       moe_tp_list: [1, 2, 4, 8]
-      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+      moe_ep_list: [1, 2, 4, 8]
       
   # each decode worker config
   decode_worker_config:
@@ -87,12 +87,12 @@ disagg_config:
       fmha_quant_mode: "fp8" # FP8 attention
       comm_quant_mode: "half" # FP16 communication
     parallel_config:
-      num_gpu_per_worker: [1, 2, 4, 8, 16, 32, 64, 128, 256]
+      num_gpu_per_worker: [1, 2, 4, 8, 16, 32, 64]
       tp_list: [1, 2, 4, 8]
       pp_list: [1]
-      dp_list: [1, 2, 4, 8, 16, 32, 64] # Attention DP for decode
+      dp_list: [1, 2, 4, 8] # Attention DP for decode
       moe_tp_list: [1, 2, 4, 8]
-      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+      moe_ep_list: [1, 2, 4, 8]
 
 # advanced tuning config optimized for DeepSeek V3
 # prefill_correction_scale: 1.0 # Prefill performance scaling factor
