@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# ============================= User config section begin =============================
+# DeepSeek V3 configuration optimized for GB200 NVL72 with FP8
+# Model: DEEPSEEK_V3 (61 layers, 128 heads, 7168 hidden, 256 experts, top-8)
+nextn: 1 # mtp 1
+nextn_accept_rates: [0.85,0,0,0,0] # each position maps to the accept rate of the ith draft token
+
+# Your scenario and required SLA
+isl: 4000 # input sequence length
+osl: 1000 # output sequence length
+ttft: 300.0  # Target TTFT in ms
+tpot: 20.0   # Target TPOT in ms
+
+common_framework_config: &common_framework_config
+  backend_name: "trtllm" # trtllm, sglang, vllm
+  version: "1.0.0rc3" # based on your local database
+
+agg_system_name: &agg_system_name "gb200_nvl72" # GB200 NVL72 system
+disagg_prefill_system_name: &disagg_prefill_system_name "gb200_nvl72"
+disagg_decode_system_name: &disagg_decode_system_name "gb200_nvl72"
+# ============================= User config section end =============================
+
+# ----------------------------- no need to modify below --------------------------------
+
+# Optimized search system config for DeepSeek V3 on GB200 NVL72
+# ============================= search system config begin =============================
+# agg(colocation) config
+agg_config:
+  agg_worker_config:
+    system_config:
+      system_name: *agg_system_name
+      <<: *common_framework_config
+    quant_config:
+      gemm_quant_mode: "fp8_block" # FP8 for optimal GB200 performance
+      moe_quant_mode: "fp8_block" # FP8 for MoE layers
+      kvcache_quant_mode: "fp8" # FP8 KV cache for memory efficiency
+      fmha_quant_mode: "fp8" # FP8 attention
+      comm_quant_mode: "half" # FP16 communication
+    parallel_config:
+      # Optimized for 64 GPU workload with NVLink domain support
+      num_gpu_per_worker: [4, 8, 16, 32, 64]
+      tp_list: [1, 2, 4, 8]
+      pp_list: [1]
+      dp_list: [1, 2, 4, 8, 16, 32, 64]
+      moe_tp_list: [1, 2, 4, 8]
+      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+
+# disaggregated (PD) config
+disagg_config:
+  # the whole replica config, a replica is the minimum unit of disagg deployment
+  replica_config:
+    num_gpu_per_replica: [16, 24, 32, 48, 64, 72, 96, 144, 216, 288] # Scaled for NVL72
+    max_gpu_per_replica: 288 # 4 NVL72 nodes max per replica
+    max_prefill_worker: 36 # Up to 36 prefill workers per replica
+    max_decode_worker: 36 # Up to 36 decode workers per replica
+    
+  # each prefill worker config
+  prefill_worker_config:
+    system_config:
+      system_name: *disagg_prefill_system_name
+      <<: *common_framework_config
+    quant_config:
+      gemm_quant_mode: "fp8_block" # FP8 for prefill computation
+      moe_quant_mode: "fp8_block" # FP8 MoE
+      kvcache_quant_mode: "fp8" # FP8 KV cache
+      fmha_quant_mode: "fp8" # FP8 attention
+      comm_quant_mode: "half" # FP16 communication
+    parallel_config:
+      num_gpu_per_worker: [4, 8, 16, 32, 64]
+      tp_list: [1, 2, 4, 8]
+      pp_list: [1]
+      dp_list: [1] # No attention DP for prefill
+      moe_tp_list: [1, 2, 4, 8]
+      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+      
+  # each decode worker config
+  decode_worker_config:
+    system_config:
+      system_name: *disagg_decode_system_name
+      <<: *common_framework_config
+    quant_config:
+      gemm_quant_mode: "fp8_block" # FP8 for decode computation
+      moe_quant_mode: "fp8_block" # FP8 MoE
+      kvcache_quant_mode: "fp8" # FP8 KV cache
+      fmha_quant_mode: "fp8" # FP8 attention
+      comm_quant_mode: "half" # FP16 communication
+    parallel_config:
+      num_gpu_per_worker: [4, 8, 16, 32, 64]
+      tp_list: [1, 2, 4, 8]
+      pp_list: [1]
+      dp_list: [1, 2, 4, 8, 16, 32, 64] # Attention DP for decode
+      moe_tp_list: [1, 2, 4, 8]
+      moe_ep_list: [1, 2, 4, 8, 16, 32, 64]
+
+# advanced tuning config optimized for DeepSeek V3
+prefill_correction_scale: 1.0 # Prefill performance scaling factor
+decode_correction_scale: 1.0 # Decode performance scaling factor
+prefill_max_batch_size: 1 # Prefill typically uses small batches
+decode_max_batch_size: 512 # Decode can use larger batches for throughput
