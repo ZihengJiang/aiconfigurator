@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+data_dir: data/gb200_nvl72 # relative to systems_dir
+gpu:
+  mem_bw: 8000000000000 # 8TB/s per GPU - same as GB200
+  mem_bw_empirical_scaling_factor: 0.8 # some nonofficial correction based on observations
+  mem_empirical_constant_latency: 0.000003 # 3us some nonofficial correction based on observations
+  mem_capacity: 206158430208 # 192GiB per GPU
+  float16_tc_flops: 2500000000000000 # 2500TFLOPS per GPU
+  int8_tc_flops: 5000000000000000 # 5000TFLOPS per GPU 
+  fp8_tc_flops: 5000000000000000 # 5000TFLOPS per GPU
+  power: 1200  # Watt per GPU
+  sm_version: 100
+
+node:
+  num_gpus_per_node: 72 # NVL72 configuration with 72 GPUs per node
+  inter_node_bw: 25000000000  # Byte/s per GPU, single direction, InfiniBand
+  intra_node_bw: 900000000000  # Byte/s per gpu, single direction, NVLink
+  pcie_bw: 64000000000  # Byte/s, single direction, PCIe 5.0
+  p2p_latency: 0.00001  # 10us some nonofficial correction based on observations
+
+misc:
+  nccl_mem: # some nonofficial correction based on observations, scaled for 72 GPUs
+    1: 0
+    2: 358612992 # 342MB
+    4: 411041792 # 392MB
+    8: 411041792 # 392MB
+    16: 512000000 # 488MB estimated
+    32: 614400000 # 586MB estimated
+    72: 838860800 # 800MB estimated for full NVL72
+  other_mem: 577765376 # 551MB
+  nccl_version: '2.23'

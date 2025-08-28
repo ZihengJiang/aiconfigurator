@@ -47,12 +47,8 @@ def get_database(system : str,
         if os.path.exists(os.path.join(systems_dir, system+'.yaml')):
             system_spec = yaml.load(open(os.path.join(systems_dir, system+'.yaml')), Loader=yaml.SafeLoader)
             data_path = os.path.join(systems_dir, system_spec['data_dir'], backend, version)
-            if os.path.exists(data_path):
-                database = PerfDatabase(system, backend, version, systems_dir)
-                databases_cache[system][backend][version] = database
-            else:
-                database = None
-                logger.error(f"data path {data_path} not found")
+            database = PerfDatabase(system, backend, version, systems_dir)
+            databases_cache[system][backend][version] = database
         else:
             logger.error(f"system yaml {os.path.join(systems_dir, system+'.yaml')} not found")
             database = None
@@ -438,7 +434,11 @@ class PerfDatabase(object):
         self._context_attention_data = load_context_attention_data(os.path.join(data_dir, common.PerfDataFilename.context_attention.value))
         self._generation_attention_data = load_generation_attention_data(os.path.join(data_dir, common.PerfDataFilename.generation_attention.value))
         self._custom_allreduce_data = load_custom_allreduce_data(os.path.join(data_dir, common.PerfDataFilename.custom_allreduce.value))
-        self._moe_data, self._moe_low_latency_data = load_moe_data(os.path.join(data_dir, common.PerfDataFilename.moe.value))
+        moe_result = load_moe_data(os.path.join(data_dir, common.PerfDataFilename.moe.value))
+        if moe_result is None:
+            self._moe_data, self._moe_low_latency_data = None, None
+        else:
+            self._moe_data, self._moe_low_latency_data = moe_result
         self._context_mla_data = load_context_mla_data(os.path.join(data_dir, common.PerfDataFilename.context_mla.value))
         self._generation_mla_data = load_generation_mla_data(os.path.join(data_dir, common.PerfDataFilename.generation_mla.value))
         self._nccl_data = load_nccl_data(nccl_data_dir)
@@ -447,80 +447,85 @@ class PerfDatabase(object):
         # pre-correction
         self._correct_data()
 
-        for quant_mode in self._context_attention_data.keys():
-            for kv_cache_dtype in self._context_attention_data[quant_mode].keys():
-                for num_kv_heads in self._context_attention_data[quant_mode][kv_cache_dtype]:
-                    data_dict=self._context_attention_data[quant_mode][kv_cache_dtype][num_kv_heads]
-                    min_x = min(data_dict.keys())
-                    target_x_list=[4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 72, 96, 128] # n
-                    # currently, support max seq to 1M. Because all the system is linear for now. it will be difficult to do square interpolation. Use more points to do the approximation
-                    target_y_list=[16,32,64,128,256,512,1024,2048] + [4096+i*2048 for i in range(14)] + \
-                        [32768 + 16384*i for i in range(6)] + [131072 + 32768*i for i in range(12)] + [524288 + 65536*i for i in range(9)]# s
-                    target_z_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048] # b
+        if self._context_attention_data:
+            for quant_mode in self._context_attention_data.keys():
+                for kv_cache_dtype in self._context_attention_data[quant_mode].keys():
+                    for num_kv_heads in self._context_attention_data[quant_mode][kv_cache_dtype]:
+                        data_dict=self._context_attention_data[quant_mode][kv_cache_dtype][num_kv_heads]
+                        min_x = min(data_dict.keys())
+                        target_x_list=[4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 72, 96, 128] # n
+                        # currently, support max seq to 1M. Because all the system is linear for now. it will be difficult to do square interpolation. Use more points to do the approximation
+                        target_y_list=[16,32,64,128,256,512,1024,2048] + [4096+i*2048 for i in range(14)] + \
+                            [32768 + 16384*i for i in range(6)] + [131072 + 32768*i for i in range(12)] + [524288 + 65536*i for i in range(9)]# s
+                        target_z_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048] # b
 
+                        filtered_x_list = []
+                        for i in target_x_list:
+                            if i >= min_x:
+                                filtered_x_list.append(i)
+
+                        self._extrapolate_data_grid(data_dict=data_dict, #nsb
+                                                    target_x_list=filtered_x_list,
+                                                    target_y_list=target_y_list,
+                                                    target_z_list=target_z_list, sqrt_y_value=True)
+
+        if self._generation_attention_data:
+            for kv_cache_dtype in self._generation_attention_data.keys():
+                for num_kv_heads in self._generation_attention_data[kv_cache_dtype]:
+                    target_x_list=[4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 72, 96, 128] # n
+                    target_y_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048,8192] # b
+                    target_z_list=[1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,2097152*8] # s
+                    data_dict = self._generation_attention_data[kv_cache_dtype][num_kv_heads]
+                    min_x = min(data_dict.keys())
                     filtered_x_list = []
                     for i in target_x_list:
                         if i >= min_x:
                             filtered_x_list.append(i)
 
-                    self._extrapolate_data_grid(data_dict=data_dict, #nsb
+                    self._extrapolate_data_grid(data_dict=data_dict, #nbs
                                                 target_x_list=filtered_x_list,
+                                                target_y_list=target_y_list,
+                                                target_z_list=target_z_list)
+                    
+        if self._gemm_data:
+            for quant_mode, data_dict in self._gemm_data.items():
+                target_x_list = [1,2,4,8,16,32,48,64,80,96,128,160,192,224,256,320,384,448,512,640,768,896,1024,2048,4096,8192,16384,32768,131072,524288,1048576,2097152*8] # num_tokens
+                target_y_list = [32,64,128,256,512,768,1024,1536,2048,2560,3072,3584,4096,5120,6144,7168,8192,10240,12288,14336,16384,20480,24576,28672,32768,40960,49152,57344,65536,131072,262144] # to fit vocab gemm
+                target_z_list = target_y_list
+                self._extrapolate_data_grid(data_dict=data_dict, 
+                                      target_x_list=target_x_list,
+                                      target_y_list=target_y_list,
+                                      target_z_list=target_z_list)
+        
+        # mla
+        if self._context_mla_data:
+            for quant_mode in self._context_mla_data.keys():
+                for kv_cache_dtype in self._context_mla_data[quant_mode].keys():
+                    tp_list =  list(self._context_mla_data[quant_mode][kv_cache_dtype].keys())
+                    data_dict=self._context_mla_data[quant_mode][kv_cache_dtype]
+                    target_x_list=tp_list # to reuse x dim
+                    # currently, support max seq to 1M. Because all the system is linear for now. it will be difficult to do square interpolation. Use more points to do the approximation
+                    target_y_list=[16,32,64,128,256,512,1024,2048] + [4096+i*2048 for i in range(14)] + \
+                        [32768 + 16384*i for i in range(6)] + [131072 + 32768*i for i in range(12)] + [524288 + 65536*i for i in range(9)]# s
+                    target_z_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048] # b
+
+                    self._extrapolate_data_grid(data_dict=data_dict, #tpsize,sb
+                                                target_x_list=target_x_list,
                                                 target_y_list=target_y_list,
                                                 target_z_list=target_z_list, sqrt_y_value=True)
 
-        for kv_cache_dtype in self._generation_attention_data.keys():
-            for num_kv_heads in self._generation_attention_data[kv_cache_dtype]:
-                target_x_list=[4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 72, 96, 128] # n
+        if self._generation_mla_data:
+            for kv_cache_dtype in self._generation_mla_data.keys():
+                tp_list =  list(self._generation_mla_data[kv_cache_dtype].keys())
+                data_dict=self._generation_mla_data[kv_cache_dtype]
+                target_x_list=tp_list # n
                 target_y_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048,8192] # b
                 target_z_list=[1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,2097152*8] # s
-                data_dict = self._generation_attention_data[kv_cache_dtype][num_kv_heads]
-                min_x = min(data_dict.keys())
-                filtered_x_list = []
-                for i in target_x_list:
-                    if i >= min_x:
-                        filtered_x_list.append(i)
 
-                self._extrapolate_data_grid(data_dict=data_dict, #nbs
-                                            target_x_list=filtered_x_list,
-                                            target_y_list=target_y_list,
-                                            target_z_list=target_z_list)
-                
-        for quant_mode, data_dict in self._gemm_data.items():
-            target_x_list = [1,2,4,8,16,32,48,64,80,96,128,160,192,224,256,320,384,448,512,640,768,896,1024,2048,4096,8192,16384,32768,131072,524288,1048576,2097152*8] # num_tokens
-            target_y_list = [32,64,128,256,512,768,1024,1536,2048,2560,3072,3584,4096,5120,6144,7168,8192,10240,12288,14336,16384,20480,24576,28672,32768,40960,49152,57344,65536,131072,262144] # to fit vocab gemm
-            target_z_list = target_y_list
-            self._extrapolate_data_grid(data_dict=data_dict, 
-                                  target_x_list=target_x_list,
-                                  target_y_list=target_y_list,
-                                  target_z_list=target_z_list)
-        
-        # mla
-        for quant_mode in self._context_mla_data.keys():
-            for kv_cache_dtype in self._context_mla_data[quant_mode].keys():
-                tp_list =  list(self._context_mla_data[quant_mode][kv_cache_dtype].keys())
-                data_dict=self._context_mla_data[quant_mode][kv_cache_dtype]
-                target_x_list=tp_list # to reuse x dim
-                # currently, support max seq to 1M. Because all the system is linear for now. it will be difficult to do square interpolation. Use more points to do the approximation
-                target_y_list=[16,32,64,128,256,512,1024,2048] + [4096+i*2048 for i in range(14)] + \
-                    [32768 + 16384*i for i in range(6)] + [131072 + 32768*i for i in range(12)] + [524288 + 65536*i for i in range(9)]# s
-                target_z_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048] # b
-
-                self._extrapolate_data_grid(data_dict=data_dict, #tpsize,sb
+                self._extrapolate_data_grid(data_dict=data_dict, #tpsize, bs
                                             target_x_list=target_x_list,
                                             target_y_list=target_y_list,
-                                            target_z_list=target_z_list, sqrt_y_value=True)
-
-        for kv_cache_dtype in self._generation_mla_data.keys():
-            tp_list =  list(self._generation_mla_data[kv_cache_dtype].keys())
-            data_dict=self._generation_mla_data[kv_cache_dtype]
-            target_x_list=tp_list # n
-            target_y_list=[1,2,4,8,16,32,64,128,256,384,512,1024,2048,8192] # b
-            target_z_list=[1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,2097152*8] # s
-
-            self._extrapolate_data_grid(data_dict=data_dict, #tpsize, bs
-                                        target_x_list=target_x_list,
-                                        target_y_list=target_y_list,
-                                        target_z_list=target_z_list)
+                                            target_z_list=target_z_list)
         
         # post-correction
         self._correct_data()
@@ -532,14 +537,14 @@ class PerfDatabase(object):
         Update the support matrix
         """
         self.supported_quant_mode = {
-            'gemm': [key.name for key in self._gemm_data.keys()],
-            'context_attention': [key.name for key in self._context_attention_data.keys()],
-            'generation_attention': [key.name for key in self._generation_attention_data.keys()],
-            'context_mla': [key.name for key in self._context_mla_data.keys()],
-            'generation_mla': [key.name for key in self._generation_mla_data.keys()],
-            'mla_bmm': [key.name for key in self._mla_bmm_data.keys()],
-            'nccl': [key.name for key in self._nccl_data.keys()],
-            'moe': [key.name for key in self._moe_data.keys()],
+            'gemm': [key.name for key in self._gemm_data.keys()] if self._gemm_data else [],
+            'context_attention': [key.name for key in self._context_attention_data.keys()] if self._context_attention_data else [],
+            'generation_attention': [key.name for key in self._generation_attention_data.keys()] if self._generation_attention_data else [],
+            'context_mla': [key.name for key in self._context_mla_data.keys()] if self._context_mla_data else [],
+            'generation_mla': [key.name for key in self._generation_mla_data.keys()] if self._generation_mla_data else [],
+            'mla_bmm': [key.name for key in self._mla_bmm_data.keys()] if self._mla_bmm_data else [],
+            'nccl': [key.name for key in self._nccl_data.keys()] if self._nccl_data else [],
+            'moe': [key.name for key in self._moe_data.keys()] if self._moe_data else [],
         }
 
     def is_inter_node(self, num_gpus: int) -> bool:
@@ -764,6 +769,9 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(m, n, k, quant_mode)
         else:
+            # Fallback to SOL mode if no GEMM data available
+            if not self._gemm_data or quant_mode not in self._gemm_data:
+                return self.query_gemm(m, n, k, quant_mode, sol_mode=common.SOLMode.SOL)
             result = self._interp_3d(m, n, k, self._gemm_data[quant_mode], 'cubic')
             return result
     
@@ -797,6 +805,12 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(b, s, n, n_kv, kvcache_quant_mode, fmha_quant_mode)
         else:
+            # Fallback to SOL mode if no context attention data available
+            if (not self._context_attention_data or 
+                fmha_quant_mode not in self._context_attention_data or
+                kvcache_quant_mode not in self._context_attention_data[fmha_quant_mode]):
+                return self.query_context_attention(b, s, n, n_kv, kvcache_quant_mode, fmha_quant_mode, sol_mode=common.SOLMode.SOL)
+            
             if n_kv == n:
                 attention_dict = self._context_attention_data[fmha_quant_mode][kvcache_quant_mode][0]
             else:
@@ -837,6 +851,11 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(b, s, n, n_kv, kvcache_quant_mode)
         else:
+            # Fallback to SOL mode if no generation attention data available
+            if (not self._generation_attention_data or 
+                kvcache_quant_mode not in self._generation_attention_data):
+                return self.query_generation_attention(b, s, n, n_kv, kvcache_quant_mode, sol_mode=common.SOLMode.SOL)
+            
             if n_kv == n:
                 attention_dict = self._generation_attention_data[kvcache_quant_mode][0]
             else:
@@ -875,6 +894,12 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(b, s, tp_size, kvcache_quant_mode, fmha_quant_mode)
         else:
+            # Fallback to SOL mode if no context mla data available
+            if (not self._context_mla_data or 
+                fmha_quant_mode not in self._context_mla_data or
+                kvcache_quant_mode not in self._context_mla_data[fmha_quant_mode]):
+                return self.query_context_mla(b, s, tp_size, kvcache_quant_mode, fmha_quant_mode, sol_mode=common.SOLMode.SOL)
+            
             mla_dict = self._context_mla_data[fmha_quant_mode][kvcache_quant_mode]
             latency = self._interp_3d(tp_size, s, b, mla_dict, 'cubic')
             return latency
@@ -910,6 +935,11 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(b, s, tp_size, kvcache_quant_mode)
         else:
+            # Fallback to SOL mode if no generation mla data available
+            if (not self._generation_mla_data or 
+                kvcache_quant_mode not in self._generation_mla_data):
+                return self.query_generation_mla(b, s, tp_size, kvcache_quant_mode, sol_mode=common.SOLMode.SOL)
+            
             mla_dict = self._generation_mla_data[kvcache_quant_mode]
             latency =  self._interp_3d(tp_size, b, s, mla_dict, 'bilinear')
             return latency
@@ -946,6 +976,13 @@ class PerfDatabase(object):
         else:
             if tp_size == 1:
                 return 0.
+            if (not self._custom_allreduce_data or
+                quant_mode not in self._custom_allreduce_data or 
+                min(tp_size,8) not in self._custom_allreduce_data[quant_mode] or
+                'AUTO' not in self._custom_allreduce_data[quant_mode][min(tp_size,8)] or
+                not self._custom_allreduce_data[quant_mode][min(tp_size,8)]['AUTO']):
+                # Fallback to SOL mode if no AllReduce data available
+                return self.query_allreduce(quant_mode, tp_size, size, sol_mode=common.SOLMode.SOL)
             comm_dict = self._custom_allreduce_data[quant_mode][min(tp_size,8)]['AUTO'] # use AUTO for allreduce strategy
             size_left, size_right = self._nearest_1d_point_helper(size, list(comm_dict.keys()), inner_only=False)
             lat = self._interp_1d([size_left, size_right], [comm_dict[size_left], comm_dict[size_right]], size)
@@ -993,6 +1030,12 @@ class PerfDatabase(object):
             if num_gpus == 1:
                 return 0.
 
+        if (not self._nccl_data or 
+            dtype not in self._nccl_data or
+            operation not in self._nccl_data[dtype] or
+            not self._nccl_data[dtype][operation]):
+            # Fallback to SOL mode if no NCCL data available
+            return self.query_nccl(dtype, num_gpus, operation, message_size, sol_mode=common.SOLMode.SOL)
         max_num_gpus = max(self._nccl_data[dtype][operation].keys())
         nccl_dict = self._nccl_data[dtype][operation][min(num_gpus,max_num_gpus)]
         size_left, size_right = self._nearest_1d_point_helper(message_size, list(nccl_dict.keys()), inner_only=False)
@@ -1055,16 +1098,29 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution)
         else:
+            # Fallback to SOL mode if no MoE data available
+            if not self._moe_data:
+                return self.query_moe(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution, sol_mode=common.SOLMode.SOL)
+                
             # aligned with trtllm, kernel source selection.
             if num_tokens <= 128 and self._moe_low_latency_data and quant_mode == common.MoEQuantMode.nvfp4:
                 try:
                     moe_dict = self._moe_low_latency_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
                     logger.debug(f"trying to find low latency data for moe {quant_mode} {workload_distribution} {topk} {num_experts} {hidden_size} {inter_size} {moe_tp_size} {moe_ep_size} but failed.")
                 except:
-                    moe_dict = self._moe_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
+                    try:
+                        moe_dict = self._moe_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
+                    except:
+                        return self.query_moe(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution, sol_mode=common.SOLMode.SOL)
             else:
-                moe_dict = self._moe_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
+                try:
+                    moe_dict = self._moe_data[quant_mode][workload_distribution][topk][num_experts][hidden_size][inter_size][moe_tp_size][moe_ep_size]
+                except:
+                    return self.query_moe(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution, sol_mode=common.SOLMode.SOL)
 
+            if not moe_dict or len(moe_dict.keys()) < 2:
+                # Fallback to SOL mode if insufficient MoE data
+                return self.query_moe(num_tokens, hidden_size, inter_size, topk, num_experts, moe_tp_size, moe_ep_size, quant_mode, workload_distribution, sol_mode=common.SOLMode.SOL)
             num_left, num_right = self._nearest_1d_point_helper(num_tokens, list(moe_dict.keys()), inner_only=False)
             lat = self._interp_1d([num_left, num_right], [moe_dict[num_left], moe_dict[num_right]], num_tokens)
             return lat
@@ -1095,9 +1151,20 @@ class PerfDatabase(object):
         elif sol_mode == common.SOLMode.SOL_FULL:
             return get_sol(num_tokens, num_heads, quant_mode, if_pre)
         else:
+            # Fallback to SOL mode if no MLA BMM data available
+            if not self._mla_bmm_data:
+                return self.query_mla_bmm(num_tokens, num_heads, quant_mode, if_pre, sol_mode=common.SOLMode.SOL)
+                
             if quant_mode not in self._mla_bmm_data:
                 quant_mode = common.GEMMQuantMode.float16
-            mla_bmm_dict = self._mla_bmm_data[quant_mode]['mla_gen_pre' if if_pre else 'mla_gen_post'][num_heads]
+            op_name = 'mla_gen_pre' if if_pre else 'mla_gen_post'
+            if op_name not in self._mla_bmm_data[quant_mode] or num_heads not in self._mla_bmm_data[quant_mode][op_name]:
+                # Fallback to SOL mode if specific MLA BMM data not available
+                return self.query_mla_bmm(num_tokens, num_heads, quant_mode, if_pre, sol_mode=common.SOLMode.SOL)
+            mla_bmm_dict = self._mla_bmm_data[quant_mode][op_name][num_heads]
+            if not mla_bmm_dict or len(mla_bmm_dict.keys()) < 2:
+                # Fallback to SOL mode if insufficient MLA BMM data
+                return self.query_mla_bmm(num_tokens, num_heads, quant_mode, if_pre, sol_mode=common.SOLMode.SOL)
             num_left, num_right = self._nearest_1d_point_helper(num_tokens, list(mla_bmm_dict.keys()), inner_only=False)
             lat = self._interp_1d([num_left, num_right], [mla_bmm_dict[num_left], mla_bmm_dict[num_right]], num_tokens)
             return lat
@@ -1152,29 +1219,31 @@ class PerfDatabase(object):
         Correct the data based on sol time reference.
         """
         # correct gemm
-        for quant_mode in self._gemm_data.keys():
-            for m in self._gemm_data[quant_mode].keys():
-                for n in self._gemm_data[quant_mode][m].keys():
-                    for k in self._gemm_data[quant_mode][m][n].keys():
-                        sol = self.query_gemm(m, n, k, quant_mode, sol_mode=common.SOLMode.SOL)
-                        if sol > self._gemm_data[quant_mode][m][n][k]:
-                            logger.debug('gemm quant {} m{} n{} k{}: sol {} > perf_db {}'.format(quant_mode, m, n, k, sol, self._gemm_data[quant_mode][m][n][k]))
-                            self._gemm_data[quant_mode][m][n][k] = max(sol, self._gemm_data[quant_mode][m][n][k])
+        if self._gemm_data:
+            for quant_mode in self._gemm_data.keys():
+                for m in self._gemm_data[quant_mode].keys():
+                    for n in self._gemm_data[quant_mode][m].keys():
+                        for k in self._gemm_data[quant_mode][m][n].keys():
+                            sol = self.query_gemm(m, n, k, quant_mode, sol_mode=common.SOLMode.SOL)
+                            if sol > self._gemm_data[quant_mode][m][n][k]:
+                                logger.debug('gemm quant {} m{} n{} k{}: sol {} > perf_db {}'.format(quant_mode, m, n, k, sol, self._gemm_data[quant_mode][m][n][k]))
+                                self._gemm_data[quant_mode][m][n][k] = max(sol, self._gemm_data[quant_mode][m][n][k])
         
         # correct generation attention
-        for quant_mode in self._generation_attention_data.keys():
-            for n_kv in self._generation_attention_data[quant_mode].keys():
-                for n in self._generation_attention_data[quant_mode][n_kv].keys():
-                    for b in self._generation_attention_data[quant_mode][n_kv][n].keys():
-                        for s in self._generation_attention_data[quant_mode][n_kv][n][b].keys():
-                            if n_kv == 0:
-                                n_kv_local = n
-                            else:
-                                n_kv_local = n_kv
-                            sol = self.query_generation_attention(b, s, n, n_kv_local, quant_mode, sol_mode=common.SOLMode.SOL)
-                            if sol > self._generation_attention_data[quant_mode][n_kv][n][b][s]:
-                                logger.debug('generation attention quant {} n{} n_kv{} b{} s{}: sol {} > perf_db {}'.format(quant_mode, n, n_kv_local, b, s, sol, self._generation_attention_data[quant_mode][n_kv][n][b][s]))
-                                self._generation_attention_data[quant_mode][n_kv][n][b][s] = sol
+        if self._generation_attention_data:
+            for quant_mode in self._generation_attention_data.keys():
+                for n_kv in self._generation_attention_data[quant_mode].keys():
+                    for n in self._generation_attention_data[quant_mode][n_kv].keys():
+                        for b in self._generation_attention_data[quant_mode][n_kv][n].keys():
+                            for s in self._generation_attention_data[quant_mode][n_kv][n][b].keys():
+                                if n_kv == 0:
+                                    n_kv_local = n
+                                else:
+                                    n_kv_local = n_kv
+                                sol = self.query_generation_attention(b, s, n, n_kv_local, quant_mode, sol_mode=common.SOLMode.SOL)
+                                if sol > self._generation_attention_data[quant_mode][n_kv][n][b][s]:
+                                    logger.debug('generation attention quant {} n{} n_kv{} b{} s{}: sol {} > perf_db {}'.format(quant_mode, n, n_kv_local, b, s, sol, self._generation_attention_data[quant_mode][n_kv][n][b][s]))
+                                    self._generation_attention_data[quant_mode][n_kv][n][b][s] = sol
                 
     
 if __name__ == '__main__':
