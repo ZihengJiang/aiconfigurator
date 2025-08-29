@@ -1,0 +1,14 @@
+ python evaluate_workload.py \
+    --model DEEPSEEK_V3 \
+    --system gb200_nvl72 \
+    --disagg \
+    --prefill-workers 12 \
+    --prefill-parallel tp4pp1dp1etp4ep1 \
+    --prefill-bs 1 \
+    --decode-workers 1 \
+    --decode-parallel tp1pp1dp16etp8ep2 \
+    --decode-bs 344 \
+    --isl 10240 \
+    --osl 1024 \
+    --quant gemm=fp8_ootb,kvcache=fp8,fmha=fp8,moe=fp8 \
+    --verbose
