@@ -1,0 +1,108 @@
+2025-08-29 18:33:49,985 - aiconfigurator.sdk.perf_database - INFO - loading system='gb200_nvl72', backend='trtllm', version='0.20.0'
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - GEMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/gemm_perf.txt not found.
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - Context attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_attention_perf.txt not found.
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - Generation attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_attention_perf.txt not found.
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - Custom allreduce data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/custom_allreduce_perf.txt not found.
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - MOE data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/moe_perf.txt not found.
+2025-08-29 18:33:49,988 - aiconfigurator.sdk.perf_database - WARNING - Context mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_mla_perf.txt not found.
+2025-08-29 18:33:49,989 - aiconfigurator.sdk.perf_database - WARNING - Generation mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_mla_perf.txt not found.
+2025-08-29 18:33:49,989 - aiconfigurator.sdk.perf_database - WARNING - NCCL data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/nccl/2.23/nccl_perf.txt not found.
+2025-08-29 18:33:49,989 - aiconfigurator.sdk.perf_database - WARNING - MLA BMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/mla_bmm_perf.txt not found.
+2025-08-29 18:33:49,989 - __main__ - WARNING - Using SOL mode for gb200_nvl72/trtllm/0.20.0
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - GEMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/gemm_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - Context attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_attention_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - Generation attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_attention_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - Custom allreduce data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/custom_allreduce_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - MOE data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/moe_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - Context mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_mla_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - Generation mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_mla_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - NCCL data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/nccl/2.23/nccl_perf.txt not found.
+2025-08-29 18:33:49,990 - aiconfigurator.sdk.perf_database - WARNING - MLA BMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/mla_bmm_perf.txt not found.
+
+================================================================================
+WORKLOAD EVALUATION RESULTS
+================================================================================
+
+Unified Configuration:
+  Model: DEEPSEEK_V3
+  System: gb200_nvl72
+  Total GPUs: 8
+  Parallel: tp1pp1dp8etp2ep4
+  Batch Size: 128 (per-GPU: 16)
+
+Key Performance Metrics:
+  Tokens/s/GPU: 874.45
+  Tokens/s/user: 68.47
+  Total Tokens/s: 6995.56
+  TTFT (ms): 3795.61
+  TPOT (ms): 14.61
+  Sequences/s: 6.83
+  Concurrency: 128
+
+------------------------------------------------------------
+MEMORY CONSUMPTION
+------------------------------------------------------------
+  Per-GPU Memory:
+    total                       :    291.415 GB
+    weights                     :     96.855 GB
+    activations                 :    188.125 GB
+    kvcache                     :      5.897 GB
+    nccl                        :      0.000 GB
+    others                      :      0.538 GB
+
+  Total System Memory (all 8 GPUs):   2331.322 GB
+
+  OOM Status: Yes
+
+------------------------------------------------------------
+OPERATION BREAKDOWN & UTILIZATION
+------------------------------------------------------------
+
+  Context Operations Breakdown:
+  Operation                     Calls SOL Time/L(us) Total Time(us)   %Time    FLOPs/L  Mem(MB)/L Achieved TFLOPS Achieved GB/s Shape                                   
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  context_moe                      61        32388.4      1975693.3   48.1%  57724.36G  259107.32         1782.25        8000.0 E256xK8x(163840,7168,2048)              
+  context_attention                61        13743.9       838377.6   20.4%  68719.48G   26843.55         5000.00        1953.1 B16xS10240xH128                         
+  context_proj_gemm                61         7696.6       469491.5   11.4%  38482.91G    3976.20         5000.00         516.6 (163840,16384)x(16384,7168)             
+  context_moe_pre_dispatch         61         2900.1       176908.4    4.3%        N/A        N/A             N/A           N/A Dispatch(163840 tokens, E256)           
+  context_moe_post_dispatch        61         2569.0       156709.7    3.8%        N/A        N/A             N/A           N/A Dispatch(163840 tokens, E256)           
+  context_q_b_proj_gemm            61         2473.9       150908.0    3.7%  12369.51G    4315.94         5000.00        1744.6 (163840,1536)x(1536,24576)              
+  context_kv_b_proj_gemm           61         1099.5        67070.2    1.6%   5497.56G    5469.37         5000.00        4974.4 (163840,512)x(512,32768)                
+  context_downscale_gemm           61          992.1        60520.4    1.5%   4960.69G    1535.57         5000.00        1547.7 (163840,7168)x(7168,2112)               
+  context_shared_gate_gemm         61          962.1        58686.4    1.4%   4810.36G    1524.63         5000.00        1584.7 (163840,7168)x(7168,2048)               
+  context_shared_ffn1_gemm         61          962.1        58686.4    1.4%   4810.36G    1524.63         5000.00        1584.7 (163840,7168)x(7168,2048)               
+  context_shared_ffn2_gemm         61          962.1        58686.4    1.4%   4810.36G    1524.63         5000.00        1584.7 (163840,2048)x(2048,7168)               
+  context_router_gemm              61          304.5        18577.3    0.5%    601.30G    2436.37         1974.40        8000.0 (163840,7168)x(7168,256)                
+  context_shared_act_gate          61          251.7        15351.2    0.4%        N/A        N/A             N/A           N/A (163840,...)                            
+  context_add_norm_1               61            9.6          587.2    0.0%      0.10G      77.01           10.00        8000.0 (163840,7168)                           
+  context_add_norm_2               61            9.6          587.2    0.0%      0.10G      77.01           10.00        8000.0 (163840,7168)                           
+  context_embedding                 1          293.6          293.6    0.0%        N/A        N/A             N/A           N/A (163840,...)                            
+  context_logits_gemm               1          232.2          232.2    0.0%     29.65G    1857.72          127.70        8000.0 (16,7168)x(7168,129280)                 
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Operations Total                                        4107367.0  100.0% 12370041.1G 18815003.8         3011.67        4580.8                                         
+
+  Generation Operations Breakdown:
+  Operation                     Calls SOL Time/L(us) Total Time(us)   %Time    FLOPs/L  Mem(MB)/L Achieved TFLOPS Achieved GB/s Shape                                   
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  generation_moe                   61          179.3        10937.7   75.0%      5.64G    1434.45           31.44        8000.0 E256xK8x(16,7168,2048)                  
+  generation_attention             61           24.0         1461.0   10.0%     47.92G     191.61         2000.55        8000.0 B16xS10752xH128                         
+  generation_moe_pre_dispatch      61           10.3          627.2    4.3%        N/A        N/A             N/A           N/A Dispatch(16 tokens, E256)               
+  generation_proj_gemm             61            6.5          393.5    2.7%      1.64G      51.61          254.86        8000.0 (16,7168)x(7168,7168)                   
+  generation_q_b_proj_gemm         61            4.8          291.0    2.0%      1.21G      38.17          253.20        8000.0 (16,1536)x(1536,24576)                  
+  generation_logits_gemm            1          232.2          232.2    1.6%     29.65G    1857.72          127.70        8000.0 (16,7168)x(7168,129280)                 
+  generation_downscale_gemm        61            1.9          116.6    0.8%      0.48G      15.29          253.51        8000.0 (16,7168)x(7168,2112)                   
+  generation_shared_gate_gemm      61            1.9          113.1    0.8%      0.47G      14.83          253.45        8000.0 (16,7168)x(7168,2048)                   
+  generation_shared_ffn1_gemm      61            1.9          113.1    0.8%      0.47G      14.83          253.45        8000.0 (16,7168)x(7168,2048)                   
+  generation_shared_ffn2_gemm      61            1.9          113.1    0.8%      0.47G      14.83          253.45        8000.0 (16,2048)x(2048,7168)                   
+  generation_bmm_pre               61            1.2           74.0    0.5%        N/A        N/A             N/A           N/A (16,...)                                
+  generation_bmm_post              61            1.2           74.0    0.5%        N/A        N/A             N/A           N/A (16,...)                                
+  generation_router_gemm           61            0.5           29.8    0.2%      0.06G       3.91          120.22        8000.0 (16,7168)x(7168,256)                    
+  generation_moe_post_dispatch     61            0.3           15.3    0.1%        N/A        N/A             N/A           N/A Dispatch(16 tokens, E256)               
+  generation_shared_act_gate       61            0.0            1.5    0.0%        N/A        N/A             N/A           N/A (16,...)                                
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Operations Total                                          14593.1  100.0%    3589.5G   110408.2          245.97        7565.8                                         
+
+Full Summary DataFrame:
+      model   isl  osl  concurrency  request_rate  bs  global_bs     ttft   tpot  seq/s  seq/s/gpu  tokens/s  tokens/s/gpu  tokens/s/user   latency  context_latency  generation_latency  num_total_gpus  tp  pp  dp  moe_tp  moe_ep         parallel      gemm kvcache fmha       moe comm  memory backend version      system
+DEEPSEEK_V3 10240 1024          128           0.0  16        128 3795.614 14.605  6.832      0.854  6995.563       874.445          68.47 18736.447         3795.614           14940.833               8   1   1   8       2       4 tp1pp1dp8etp2ep4 fp8_block     fp8  fp8 fp8_block half 291.415  trtllm  0.20.0 gb200_nvl72
+================================================================================

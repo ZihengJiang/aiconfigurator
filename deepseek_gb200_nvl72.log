@@ -1,106 +1,106 @@
-INFO 2025-08-28 15:54:48,242 main.py:1014] Loading Dynamo aiconfigurator version: 0.1.0
-INFO 2025-08-28 15:54:48,242 main.py:890] No yaml path provided, using default template for model DEEPSEEK_V3 using backend trtllm
-INFO 2025-08-28 15:54:48,248 main.py:128] Starting configuration for DEEPSEEK_V3
-INFO 2025-08-28 15:54:48,248 main.py:129] Total GPUs to deploy on: 64
-INFO 2025-08-28 15:54:48,248 main.py:130] User scenario: ISL=10240, OSL=1024, TTFT=500.0ms, TPOT=50.0ms
-INFO 2025-08-28 15:54:48,248 main.py:133] Agg System: gb200_nvl72
-INFO 2025-08-28 15:54:48,248 main.py:138] Disagg Prefill Worker: WorkerConfig(system_name='gb200_nvl72', backend_name='trtllm', version='0.20.0', gemm_quant_mode=<GEMMQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, moe_quant_mode=<MoEQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, kvcache_quant_mode=<KVCacheQuantMode.fp8: QuantMapping(memory=1, compute=0, name='fp8')>, fmha_quant_mode=<FMHAQuantMode.fp8: QuantMapping(memory=0, compute=2, name='fp8')>, comm_quant_mode=<CommQuantMode.half: QuantMapping(memory=2, compute=0, name='half')>, num_gpu_per_worker=[1, 2, 4, 8, 16, 32, 64], tp_list=[1, 2, 4, 8], pp_list=[1], dp_list=[1], moe_tp_list=[1, 2, 4, 8], moe_ep_list=[1, 2, 4, 8, 16, 32, 64])
-INFO 2025-08-28 15:54:48,248 main.py:139] Disagg Decode Worker: WorkerConfig(system_name='gb200_nvl72', backend_name='trtllm', version='0.20.0', gemm_quant_mode=<GEMMQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, moe_quant_mode=<MoEQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, kvcache_quant_mode=<KVCacheQuantMode.fp8: QuantMapping(memory=1, compute=0, name='fp8')>, fmha_quant_mode=<FMHAQuantMode.fp8: QuantMapping(memory=0, compute=2, name='fp8')>, comm_quant_mode=<CommQuantMode.half: QuantMapping(memory=2, compute=0, name='half')>, num_gpu_per_worker=[1, 2, 4, 8, 16, 32, 64], tp_list=[1, 2, 4, 8], pp_list=[1], dp_list=[1, 2, 4, 8, 16, 32, 64], moe_tp_list=[1, 2, 4, 8], moe_ep_list=[1, 2, 4, 8, 16, 32, 64])
-INFO 2025-08-28 15:54:48,249 main.py:144] Running raw pareto analysis.It might take minutes to run...
-INFO 2025-08-28 15:54:48,249 main.py:237] Starting Agg Pareto Analysis...
-INFO 2025-08-28 15:54:48,249 perf_database.py:46] loading system='gb200_nvl72', backend='trtllm', version='0.20.0'
-WARNING 2025-08-28 15:54:48,252 perf_database.py:145] GEMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/gemm_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:218] Context attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_attention_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:255] Generation attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_attention_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:88] Custom allreduce data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/custom_allreduce_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:176] MOE data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/moe_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:293] Context mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_mla_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:326] Generation mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_mla_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:115] NCCL data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/nccl/2.23/nccl_perf.txt not found.
-WARNING 2025-08-28 15:54:48,252 perf_database.py:360] MLA BMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/mla_bmm_perf.txt not found.
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=2, moe_tp=1, moe_ep=2
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=2, moe_tp=2, moe_ep=1
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=1, moe_ep=4
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=2, moe_ep=2
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=4, moe_ep=1
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=1, moe_ep=8
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=2, moe_ep=4
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=4, moe_ep=2
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=8, moe_ep=1
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=1, moe_ep=16
-INFO 2025-08-28 15:54:48,252 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=2, moe_ep=8
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=4, moe_ep=4
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=8, moe_ep=2
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=1, moe_ep=32
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=2, moe_ep=16
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=4, moe_ep=8
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=8, moe_ep=4
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=1, moe_ep=64
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=2, moe_ep=32
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=4, moe_ep=16
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=8, moe_ep=8
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
-INFO 2025-08-28 15:54:48,253 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
-INFO 2025-08-28 16:01:13,432 main.py:281] Agg Pareto Analysis completed.
-INFO 2025-08-28 16:01:13,432 main.py:287] Starting Disagg Pareto Analysis...
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=2, moe_tp=1, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=2, moe_tp=2, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=1, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=2, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=4, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=1, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=2, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=4, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=8, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=1, moe_ep=16
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=2, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=4, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=8, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=1, moe_ep=32
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=2, moe_ep=16
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=4, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=8, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=1, moe_ep=64
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=2, moe_ep=32
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=4, moe_ep=16
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=8, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
-INFO 2025-08-28 16:01:13,433 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
-INFO 2025-08-28 16:01:50,327 main.py:370] Disagg Pareto Analysis completed.
-INFO 2025-08-28 16:01:50,327 main.py:150] Generating Pareto frontiers for Agg and Disagg...
-INFO 2025-08-28 16:01:50,555 main.py:166] Interpolating throughput at target TPOT...
-INFO 2025-08-28 16:01:50,557 main.py:480] Comparing systems: Agg interpolated throughput = 2364.15, Disagg interpolated throughput = 1728.99
-INFO 2025-08-28 16:01:50,557 main.py:481] Comparing systems: Agg actual best throughput = 2352.30, Disagg actual best throughput = 1728.45
-INFO 2025-08-28 16:01:50,557 main.py:203] Overall best system chosen: agg
-INFO 2025-08-28 16:01:50,557 main.py:204] Finished configuration for DEEPSEEK_V3
-INFO 2025-08-28 16:01:50,558 main.py:689] Configuration completed for DEEPSEEK_V3
-INFO 2025-08-28 16:01:50,576 main.py:780] 
+INFO 2025-08-29 18:12:23,460 main.py:1014] Loading Dynamo aiconfigurator version: 0.1.0
+INFO 2025-08-29 18:12:23,460 main.py:890] No yaml path provided, using default template for model DEEPSEEK_V3 using backend trtllm
+INFO 2025-08-29 18:12:23,467 main.py:128] Starting configuration for DEEPSEEK_V3
+INFO 2025-08-29 18:12:23,467 main.py:129] Total GPUs to deploy on: 64
+INFO 2025-08-29 18:12:23,467 main.py:130] User scenario: ISL=10240, OSL=1024, TTFT=500.0ms, TPOT=50.0ms
+INFO 2025-08-29 18:12:23,467 main.py:133] Agg System: gb200_nvl72
+INFO 2025-08-29 18:12:23,467 main.py:138] Disagg Prefill Worker: WorkerConfig(system_name='gb200_nvl72', backend_name='trtllm', version='0.20.0', gemm_quant_mode=<GEMMQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, moe_quant_mode=<MoEQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, kvcache_quant_mode=<KVCacheQuantMode.fp8: QuantMapping(memory=1, compute=0, name='fp8')>, fmha_quant_mode=<FMHAQuantMode.fp8: QuantMapping(memory=0, compute=2, name='fp8')>, comm_quant_mode=<CommQuantMode.half: QuantMapping(memory=2, compute=0, name='half')>, num_gpu_per_worker=[1, 2, 4, 8, 16, 32, 64], tp_list=[1, 2, 4, 8], pp_list=[1], dp_list=[1], moe_tp_list=[1, 2, 4, 8], moe_ep_list=[1, 2, 4, 8, 16, 32, 64])
+INFO 2025-08-29 18:12:23,467 main.py:139] Disagg Decode Worker: WorkerConfig(system_name='gb200_nvl72', backend_name='trtllm', version='0.20.0', gemm_quant_mode=<GEMMQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, moe_quant_mode=<MoEQuantMode.fp8_block: QuantMapping(memory=1, compute=2, name='fp8_block')>, kvcache_quant_mode=<KVCacheQuantMode.fp8: QuantMapping(memory=1, compute=0, name='fp8')>, fmha_quant_mode=<FMHAQuantMode.fp8: QuantMapping(memory=0, compute=2, name='fp8')>, comm_quant_mode=<CommQuantMode.half: QuantMapping(memory=2, compute=0, name='half')>, num_gpu_per_worker=[1, 2, 4, 8, 16, 32, 64], tp_list=[1, 2, 4, 8], pp_list=[1], dp_list=[1, 2, 4, 8, 16, 32, 64], moe_tp_list=[1, 2, 4, 8], moe_ep_list=[1, 2, 4, 8, 16, 32, 64])
+INFO 2025-08-29 18:12:23,467 main.py:144] Running raw pareto analysis.It might take minutes to run...
+INFO 2025-08-29 18:12:23,467 main.py:237] Starting Agg Pareto Analysis...
+INFO 2025-08-29 18:12:23,467 perf_database.py:46] loading system='gb200_nvl72', backend='trtllm', version='0.20.0'
+WARNING 2025-08-29 18:12:23,470 perf_database.py:145] GEMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/gemm_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:218] Context attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_attention_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:255] Generation attention data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_attention_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:88] Custom allreduce data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/custom_allreduce_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:176] MOE data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/moe_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:293] Context mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/context_mla_perf.txt not found.
+WARNING 2025-08-29 18:12:23,470 perf_database.py:326] Generation mla data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/generation_mla_perf.txt not found.
+WARNING 2025-08-29 18:12:23,471 perf_database.py:115] NCCL data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/nccl/2.23/nccl_perf.txt not found.
+WARNING 2025-08-29 18:12:23,471 perf_database.py:360] MLA BMM data file /Users/bytedance/Projects/aiconfigurator/src/aiconfigurator/systems/data/gb200_nvl72/trtllm/0.20.0/mla_bmm_perf.txt not found.
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=2, moe_tp=1, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=2, moe_tp=2, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=1, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=2, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=4, moe_tp=4, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=1, moe_ep=8
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=2, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=4, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=8, moe_tp=8, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=1, moe_ep=16
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=2, moe_ep=8
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=4, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=16, moe_tp=8, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=1, moe_ep=32
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=2, moe_ep=16
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=4, moe_ep=8
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=32, moe_tp=8, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=1, moe_ep=64
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=2, moe_ep=32
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=4, moe_ep=16
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=1, pp=1, dp=64, moe_tp=8, moe_ep=8
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
+INFO 2025-08-29 18:12:23,471 main.py:259] Enumerated Agg parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
+INFO 2025-08-29 18:14:34,530 main.py:281] Agg Pareto Analysis completed.
+INFO 2025-08-29 18:14:34,531 main.py:287] Starting Disagg Pareto Analysis...
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:325] Enumerated Disagg prefill parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=1, moe_tp=1, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=2, moe_tp=1, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=2, moe_tp=2, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=1, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=2, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=4, moe_tp=4, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=1, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=2, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=4, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=8, moe_tp=8, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=1, moe_ep=16
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=2, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=4, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=16, moe_tp=8, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=1, moe_ep=32
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=2, moe_ep=16
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=4, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=32, moe_tp=8, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=1, moe_ep=64
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=2, moe_ep=32
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=4, moe_ep=16
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=1, pp=1, dp=64, moe_tp=8, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=2, pp=1, dp=1, moe_tp=1, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=2, pp=1, dp=1, moe_tp=2, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=1, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=2, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=4, pp=1, dp=1, moe_tp=4, moe_ep=1
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=1, moe_ep=8
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=2, moe_ep=4
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=4, moe_ep=2
+INFO 2025-08-29 18:14:34,531 main.py:328] Enumerated Disagg decode parallel config: tp=8, pp=1, dp=1, moe_tp=8, moe_ep=1
+INFO 2025-08-29 18:15:10,255 main.py:370] Disagg Pareto Analysis completed.
+INFO 2025-08-29 18:15:10,256 main.py:150] Generating Pareto frontiers for Agg and Disagg...
+INFO 2025-08-29 18:15:10,477 main.py:166] Interpolating throughput at target TPOT...
+INFO 2025-08-29 18:15:10,482 main.py:480] Comparing systems: Agg interpolated throughput = 2591.33, Disagg interpolated throughput = 1749.22
+INFO 2025-08-29 18:15:10,482 main.py:481] Comparing systems: Agg actual best throughput = 2581.92, Disagg actual best throughput = 1746.82
+INFO 2025-08-29 18:15:10,482 main.py:203] Overall best system chosen: agg
+INFO 2025-08-29 18:15:10,482 main.py:204] Finished configuration for DEEPSEEK_V3
+INFO 2025-08-29 18:15:10,482 main.py:689] Configuration completed for DEEPSEEK_V3
+INFO 2025-08-29 18:15:10,498 main.py:780] 
 ********************************************************************************
 *                     Dynamo aiconfigurator Final Results                      *
 ********************************************************************************
@@ -111,34 +111,34 @@ INFO 2025-08-28 16:01:50,576 main.py:780]
     I/O Length (tokens): Input=10240, Output=1024
     SLA Target: TTFT <= 500.0ms, TPOT <= 50.0ms
   ----------------------------------------------------------------------------
-  Overall best system chosen: [1magg at 2352.30 tokens/s/gpu (1.36x better)[0m
-    - Agg Actual Best: 2352.30 tokens/s/gpu  21.25 tokens/s/user | TTFT: 435.14ms TPOT: 47.07ms
-    - Disagg Actual Best: 1728.45 tokens/s/gpu  20.08 tokens/s/user | TTFT: 109.42ms TPOT: 49.80ms
+  Overall best system chosen: [1magg at 2581.92 tokens/s/gpu (1.48x better)[0m
+    - Agg Actual Best: 2581.92 tokens/s/gpu  20.69 tokens/s/user | TTFT: 452.79ms TPOT: 48.34ms
+    - Disagg Actual Best: 1746.82 tokens/s/gpu  20.29 tokens/s/user | TTFT: 102.44ms TPOT: 49.28ms
   ----------------------------------------------------------------------------
   Pareto Frontier:
-             DEEPSEEK_V3 Pareto Frontier: tokens/s/gpu vs tokens/s/user         [0m
-    ┌──────────────────────────────────────────────────────────────────────────┐[0m
-3000┤ [0m[38;2;144;238;144mdd[0m Disagg                                                                │[0m
-    │ [0m[38;2;200;200;200maa[0m Agg                                                                   │[0m
-    │ [0m[38;2;255;215;0mXX[0m Best                                                                  │[0m
-2500┤    [0m[38;2;200;200;200maa[0m                                                                    │[0m
-    │     [0m[38;2;255;215;0mX[0m[38;2;200;200;200maa[0m                                                                  │[0m
-    │        [0m[38;2;200;200;200maa[0m                                                                │[0m
-2000┤         [0m[38;2;200;200;200maaaa[0m                                                             │[0m
-    │     [0m[38;2;144;238;144mdd[0m     [0m[38;2;200;200;200maaa[0m                                                           │[0m
-1500┤       [0m[38;2;144;238;144mdddddddd[0m[38;2;200;200;200maaa[0m[38;2;144;238;144mdddddd[0m                                                  │[0m
-    │                  [0m[38;2;200;200;200maa[0m    [0m[38;2;144;238;144mdd[0m                                                │[0m
-    │                    [0m[38;2;200;200;200maaaaaaa[0m[38;2;144;238;144mddddddddddddddddddddddddd[0m                      │[0m
-1000┤                           [0m[38;2;200;200;200maaaaaaa[0m                  [0m[38;2;144;238;144mdddd[0m                  │[0m
-    │                                 [0m[38;2;200;200;200maaaaaaaa[0m               [0m[38;2;144;238;144mddddd[0m             │[0m
-    │                                         [0m[38;2;200;200;200maaaaaa[0m              [0m[38;2;144;238;144mddddd[0m        │[0m
- 500┤                                              [0m[38;2;200;200;200maa[0m                  [0m[38;2;144;238;144mdddddddd[0m│[0m
-    │                                                [0m[38;2;200;200;200maaa[0m                       │[0m
-    │                                                   [0m[38;2;200;200;200maaaaaaaaaaaaaaaaaaaaaaa[0m│[0m
-   0┤                                                                          │[0m
-    └┬─────────────────┬──────────────────┬─────────────────┬─────────────────┬┘[0m
-     0                75                 150               225              300 [0m
-tokens/s/gpu                        tokens/s/user                               [0m
+              DEEPSEEK_V3 Pareto Frontier: tokens/s/gpu vs tokens/s/user        [0m
+      ┌────────────────────────────────────────────────────────────────────────┐[0m
+3200.0┤ [0m[38;2;144;238;144mdd[0m Disagg                                                              │[0m
+      │ [0m[38;2;200;200;200maa[0m Agg                                                                 │[0m
+      │ [0m[38;2;255;215;0mXX[0m Best                                                                │[0m
+2666.7┤    [0m[38;2;200;200;200ma[0m[38;2;255;215;0mX[0m                                                                  │[0m
+      │     [0m[38;2;200;200;200maaa[0m                                                                │[0m
+      │        [0m[38;2;200;200;200maaa[0m                                                             │[0m
+2133.3┤           [0m[38;2;200;200;200ma[0m                                                            │[0m
+      │            [0m[38;2;200;200;200maaa[0m                                                         │[0m
+1600.0┤     [0m[38;2;144;238;144mdddddddddd[0m[38;2;200;200;200maa[0m[38;2;144;238;144mddd[0m                                                    │[0m
+      │                 [0m[38;2;200;200;200maaa[0m[38;2;144;238;144mddd[0m                                                 │[0m
+      │                    [0m[38;2;200;200;200maaaaaaa[0m[38;2;144;238;144mddddddddddddddddddddddd[0m                      │[0m
+1066.7┤                           [0m[38;2;200;200;200maaaaaaa[0m                [0m[38;2;144;238;144mddddd[0m                 │[0m
+      │                                 [0m[38;2;200;200;200maaaa[0m                  [0m[38;2;144;238;144mddddd[0m            │[0m
+      │                                     [0m[38;2;200;200;200maaaaaaa[0m                [0m[38;2;144;238;144mddddd[0m       │[0m
+ 533.3┤                                            [0m[38;2;200;200;200maa[0m                   [0m[38;2;144;238;144mddddddd[0m│[0m
+      │                                              [0m[38;2;200;200;200maaaa[0m                      │[0m
+      │                                                  [0m[38;2;200;200;200maaaaaaaaaaaaaaaaaaaaaa[0m│[0m
+   0.0┤                                                                        │[0m
+      └┬─────────────────┬─────────────────┬────────────────┬─────────────────┬┘[0m
+       0                75                150              225              300 [0m
+tokens/s/gpu                         tokens/s/user                              [0m
 
   ----------------------------------------------------------------------------
   Worker Setup:
@@ -160,93 +160,89 @@ Disagg Top Configurations: (Sorted by tokens/s/gpu)
 +------+--------------+---------------+-------------+------------------+----------+-----------------+------------+----------------+------------------+-------+------------+----------------+-------------------+-------+
 | Rank | [1mtokens/s/gpu[0m | tokens/s/user | concurrency | total_gpus(used) | replicas |   gpus/replica  | (p)workers | (p)gpus/worker |   (p)parallel    | (p)bs | (d)workers | (d)gpus/worker |    (d)parallel    | (d)bs |
 +------+--------------+---------------+-------------+------------------+----------+-----------------+------------+----------------+------------------+-------+------------+----------------+-------------------+-------+
-|  1   |   [1m1728.45[0m    |     20.08     |     5504    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  344  |
-|  2   |   [1m1725.42[0m    |     20.52     |     5376    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  336  |
-|  3   |   [1m1722.26[0m    |     20.98     |     5248    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  328  |
-|  4   |   [1m1711.82[0m    |     22.50     |     4864    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  304  |
-|  5   |   [1m1708.02[0m    |     23.06     |     4736    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  296  |
-|  6   |   [1m1690.64[0m    |     25.59     |     4224    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  264  |
-|  7   |   [1m1685.68[0m    |     26.31     |     4096    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  256  |
-|  8   |   [1m1668.99[0m    |     28.75     |     3712    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  232  |
-|  9   |   [1m1662.70[0m    |     29.66     |     3584    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  224  |
-|  10  |   [1m1632.56[0m    |     33.98     |     3072    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  192  |
-|  11  |   [1m1572.91[0m    |     41.35     |     2432    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  152  |
-|  12  |   [1m1169.79[0m    |     85.44     |     896     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   56  |
-|  13  |   [1m1169.79[0m    |     208.51    |     384     |   64 (64=1x64)   |    1     |  64 (=8x4+1x32) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  32 (=[4m1[0mx[4m1[0mx[4m32[0m)  | tp[4m1[0mpp[4m1[0mdp[4m32[0metp8ep4 |   12  |
-|  14  |   [1m1163.52[0m    |     89.41     |     832     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   52  |
-|  15  |   [1m1126.38[0m    |     93.77     |     768     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   48  |
-|  16  |   [1m1040.08[0m    |     103.91    |     640     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   40  |
-|  17  |    [1m932.86[0m    |     116.49    |     512     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   32  |
-|  18  |    [1m584.90[0m    |     268.94    |     160     |   64 (48=1x48)   |    1     |  48 (=4x4+1x32) |     4      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  32 (=[4m1[0mx[4m1[0mx[4m32[0m)  | tp[4m1[0mpp[4m1[0mdp[4m32[0metp8ep4 |   5   |
-|  19  |    [1m172.93[0m    |     526.52    |      21     |   64 (64=1x64)   |    1     |  64 (=1x8+7x8)  |     1      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   | tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2 |   1   |     7      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |   3   |
-|  20  |    [1m146.22[0m    |     442.97    |      22     |   64 (48=1x48)   |    1     |  48 (=1x4+11x4) |     1      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     11     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   2   |
-|  21  |    [1m115.14[0m    |    1051.80    |      7      |   64 (64=1x64)   |    1     |  64 (=1x8+7x8)  |     1      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   | tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2 |   1   |     7      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |   1   |
+|  1   |   [1m1746.82[0m    |     20.29     |     5504    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  344  |
+|  2   |   [1m1743.20[0m    |     20.73     |     5376    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  336  |
+|  3   |   [1m1727.01[0m    |     22.70     |     4864    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  304  |
+|  4   |   [1m1722.46[0m    |     23.25     |     4736    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  296  |
+|  5   |   [1m1707.41[0m    |     25.08     |     4352    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  272  |
+|  6   |   [1m1701.84[0m    |     25.76     |     4224    |   64 (64=1x64)   |    1     | 64 (=12x4+1x16) |     12     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp2ep2 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  264  |
+|  7   |   [1m1261.31[0m    |     202.02    |     416     |   64 (64=1x64)   |    1     |  64 (=8x4+1x32) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  32 (=[4m1[0mx[4m1[0mx[4m32[0m)  | tp[4m1[0mpp[4m1[0mdp[4m32[0metp8ep4 |   13  |
+|  8   |   [1m1261.31[0m    |     75.39     |     1088    |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   68  |
+|  9   |   [1m1256.74[0m    |     78.47     |     1024    |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   64  |
+|  10  |   [1m1252.26[0m    |     208.51    |     384     |   64 (64=1x64)   |    1     |  64 (=8x4+1x32) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  32 (=[4m1[0mx[4m1[0mx[4m32[0m)  | tp[4m1[0mpp[4m1[0mdp[4m32[0metp8ep4 |   12  |
+|  11  |   [1m1197.36[0m    |     85.44     |     896     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   56  |
+|  12  |   [1m1126.38[0m    |     93.77     |     768     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   48  |
+|  13  |   [1m1040.08[0m    |     103.91    |     640     |   64 (48=1x48)   |    1     |  48 (=8x4+1x16) |     8      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp1ep4 |   1   |     1      |  16 (=[4m1[0mx[4m1[0mx[4m16[0m)  | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |   40  |
+|  14  |    [1m630.66[0m    |     268.94    |     160     |   64 (48=1x48)   |    1     |  48 (=4x4+1x32) |     4      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     1      |  32 (=[4m1[0mx[4m1[0mx[4m32[0m)  | tp[4m1[0mpp[4m1[0mdp[4m32[0metp8ep4 |   5   |
+|  15  |    [1m172.93[0m    |     526.52    |      21     |   64 (64=1x64)   |    1     |  64 (=1x8+7x8)  |     1      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   | tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2 |   1   |     7      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |   3   |
+|  16  |    [1m152.42[0m    |     442.97    |      22     |   64 (48=1x48)   |    1     |  48 (=1x4+11x4) |     1      |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   | tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   1   |     11     |   4 (=[4m4[0mx[4m1[0mx[4m1[0m)   |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |   2   |
+|  17  |    [1m115.14[0m    |    1051.80    |      7      |   64 (64=1x64)   |    1     |  64 (=1x8+7x8)  |     1      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   | tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2 |   1   |     7      |   8 (=[4m8[0mx[4m1[0mx[4m1[0m)   |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |   1   |
 +------+--------------+---------------+-------------+------------------+----------+-----------------+------------+----------------+------------------+-------+------------+----------------+-------------------+-------+
 Agg Top Configurations: (Sorted by tokens/s/gpu)
-+------+--------------+---------------+-------------+------------------+----------+--------------+--------------+-------------------+-----+
-| Rank | [1mtokens/s/gpu[0m | tokens/s/user | concurrency | total_gpus(used) | replicas | gpus/replica | gpus/worker  |      parallel     |  bs |
-+------+--------------+---------------+-------------+------------------+----------+--------------+--------------+-------------------+-----+
-|  1   |   [1m2352.30[0m    |     21.25     |     896     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 | 112 |
-|  2   |   [1m2328.30[0m    |     21.35     |     896     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4 | 112 |
-|  3   |   [1m2301.84[0m    |     24.28     |     768     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  96 |
-|  4   |   [1m2270.32[0m    |     24.39     |     768     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4 |  96 |
-|  5   |   [1m2235.92[0m    |     28.38     |     640     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  80 |
-|  6   |   [1m2215.89[0m    |     28.56     |     640     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  80 |
-|  7   |   [1m2126.42[0m    |     33.85     |     512     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  64 |
-|  8   |   [1m2097.97[0m    |     34.00     |     512     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  64 |
-|  9   |   [1m2088.18[0m    |     34.06     |     512     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4 |  64 |
-|  10  |   [1m2054.51[0m    |     37.45     |     448     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  56 |
-|  11  |   [1m2021.13[0m    |     37.58     |     448     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  56 |
-|  12  |   [1m1965.84[0m    |     41.92     |     384     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  48 |
-|  13  |   [1m1965.00[0m    |     43.15     |     384     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  48 |
-|  14  |   [1m1853.80[0m    |     47.59     |     320     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1 |  40 |
-|  15  |   [1m1845.12[0m    |     49.37     |     320     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4 |  40 |
-|  16  |   [1m1724.78[0m    |     58.24     |     256     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  32 |
-|  17  |   [1m1632.01[0m    |     63.40     |     224     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  28 |
-|  18  |   [1m1522.79[0m    |     69.56     |     192     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2 |  24 |
-|  19  |   [1m1415.91[0m    |     74.38     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  20 |
-|  20  |   [1m1400.07[0m    |     75.74     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  20 |
-|  21  |   [1m1396.99[0m    |     77.19     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  20 |
-|  22  |   [1m1308.26[0m    |     84.71     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  16 |
-|  23  |   [1m1308.10[0m    |     86.59     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  16 |
-|  24  |   [1m1299.37[0m    |     89.06     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  16 |
-|  25  |   [1m1287.22[0m    |     90.36     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  16 |
-|  26  |   [1m1268.94[0m    |     93.15     |     240     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  15 |
-|  27  |   [1m1266.41[0m    |     95.41     |     240     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  15 |
-|  28  |   [1m1243.44[0m    |     101.06    |     224     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  14 |
-|  29  |   [1m1217.95[0m    |     107.43    |     208     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  13 |
-|  30  |   [1m1160.27[0m    |     108.05    |     192     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  12 |
-|  31  |   [1m1116.80[0m    |     114.13    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  11 |
-|  32  |   [1m1104.64[0m    |     116.39    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  11 |
-|  33  |   [1m1068.74[0m    |     120.94    |     160     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  10 |
-|  34  |   [1m1066.94[0m    |     124.91    |     160     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  10 |
-|  35  |   [1m1024.22[0m    |     134.77    |     144     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  9  |
-|  36  |    [1m955.66[0m    |     137.33    |     128     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  8  |
-|  37  |    [1m888.51[0m    |     147.31    |     112     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  7  |
-|  38  |    [1m867.25[0m    |     149.18    |     112     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  7  |
-|  39  |    [1m817.09[0m    |     149.23    |      96     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  6  |
-|  40  |    [1m812.39[0m    |     158.85    |      96     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  6  |
-|  41  |    [1m801.49[0m    |     163.47    |      96     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  6  |
-|  42  |    [1m725.40[0m    |     172.36    |      80     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  5  |
-|  43  |    [1m724.57[0m    |     180.79    |      80     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  5  |
-|  44  |    [1m625.00[0m    |     188.38    |      64     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  4  |
-|  45  |    [1m503.28[0m    |     189.51    |      48     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp2ep8 |  3  |
-|  46  |    [1m501.49[0m    |     192.02    |      48     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp2ep8 |  3  |
-|  47  |    [1m370.10[0m    |     201.16    |      32     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  2  |
-|  48  |    [1m369.09[0m    |     205.44    |      32     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2 |  2  |
-|  49  |    [1m232.55[0m    |     242.69    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  4  |
-|  50  |    [1m229.30[0m    |     243.31    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  4  |
-|  51  |    [1m229.24[0m    |     247.02    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  4  |
-|  52  |    [1m221.10[0m    |     308.15    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  3  |
-|  53  |    [1m219.51[0m    |     311.97    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  3  |
-|  54  |    [1m219.13[0m    |     314.37    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  3  |
-|  55  |    [1m202.45[0m    |     423.25    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  2  |
-|  56  |    [1m200.79[0m    |     428.34    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  2  |
-|  57  |    [1m199.30[0m    |     431.01    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  2  |
-|  58  |    [1m173.54[0m    |     503.46    |      3      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |  3  |
-|  59  |    [1m173.29[0m    |     508.79    |      3      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1 |  3  |
-|  60  |    [1m173.07[0m    |     707.03    |      1      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1 |  1  |
-|  61  |    [1m93.64[0m     |     757.61    |      1      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2 |  1  |
-+------+--------------+---------------+-------------+------------------+----------+--------------+--------------+-------------------+-----+
++------+--------------+---------------+-------------+------------------+----------+--------------+--------------+--------------------+-----+
+| Rank | [1mtokens/s/gpu[0m | tokens/s/user | concurrency | total_gpus(used) | replicas | gpus/replica | gpus/worker  |      parallel      |  bs |
++------+--------------+---------------+-------------+------------------+----------+--------------+--------------+--------------------+-----+
+|  1   |   [1m2581.92[0m    |     20.69     |     1024    |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  | 128 |
+|  2   |   [1m2528.09[0m    |     23.22     |     896     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  | 112 |
+|  3   |   [1m2459.89[0m    |     25.93     |     768     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1  |  96 |
+|  4   |   [1m2459.73[0m    |     26.46     |     768     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  96 |
+|  5   |   [1m2384.38[0m    |     30.24     |     640     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1  |  80 |
+|  6   |   [1m2370.03[0m    |     30.76     |     640     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  80 |
+|  7   |   [1m2259.98[0m    |     35.94     |     512     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1  |  64 |
+|  8   |   [1m2247.11[0m    |     36.73     |     512     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  64 |
+|  9   |   [1m2178.80[0m    |     39.67     |     448     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1  |  56 |
+|  10  |   [1m2166.85[0m    |     40.67     |     448     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  56 |
+|  11  |   [1m2079.76[0m    |     45.51     |     384     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2  |  48 |
+|  12  |   [1m2068.35[0m    |     45.56     |     384     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  48 |
+|  13  |   [1m1954.19[0m    |     50.07     |     320     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp8ep1  |  40 |
+|  14  |   [1m1944.60[0m    |     51.79     |     320     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp2ep4  |  40 |
+|  15  |   [1m1811.37[0m    |     60.79     |     256     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2  |  32 |
+|  16  |   [1m1709.30[0m    |     65.95     |     224     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2  |  28 |
+|  17  |   [1m1589.86[0m    |     72.07     |     192     |   64 (64=8x8)    |    8     |      8       |  8 (=[4m1[0mx[4m1[0mx[4m8[0m)  |  tp[4m1[0mpp[4m1[0mdp[4m8[0metp4ep2  |  24 |
+|  18  |   [1m1475.47[0m    |     77.61     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  20 |
+|  19  |   [1m1456.48[0m    |     78.55     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  20 |
+|  20  |   [1m1455.52[0m    |     80.08     |     320     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  20 |
+|  21  |   [1m1369.29[0m    |     90.80     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  16 |
+|  22  |   [1m1347.80[0m    |     92.01     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  16 |
+|  23  |   [1m1337.53[0m    |     93.40     |     256     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  16 |
+|  24  |   [1m1323.94[0m    |     93.83     |     240     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  15 |
+|  25  |   [1m1315.08[0m    |     96.12     |     240     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  15 |
+|  26  |   [1m1314.30[0m    |     98.46     |     240     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  15 |
+|  27  |   [1m1288.72[0m    |     104.10    |     224     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  14 |
+|  28  |   [1m1260.42[0m    |     110.42    |     208     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  13 |
+|  29  |   [1m1178.34[0m    |     112.03    |     192     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  12 |
+|  30  |   [1m1164.59[0m    |     113.47    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  11 |
+|  31  |   [1m1162.83[0m    |     113.83    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  11 |
+|  32  |   [1m1152.37[0m    |     117.09    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  11 |
+|  33  |   [1m1141.74[0m    |     119.39    |     176     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  11 |
+|  34  |   [1m1101.27[0m    |     123.84    |     160     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  10 |
+|  35  |   [1m1100.72[0m    |     127.78    |     160     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  10 |
+|  36  |   [1m1054.42[0m    |     137.44    |     144     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  9  |
+|  37  |    [1m973.62[0m    |     139.13    |     128     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp4ep4  |  8  |
+|  38  |    [1m922.33[0m    |     144.66    |     112     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  7  |
+|  39  |    [1m910.87[0m    |     149.75    |     112     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  7  |
+|  40  |    [1m891.06[0m    |     151.62    |     112     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  7  |
+|  41  |    [1m842.46[0m    |     156.19    |      96     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  6  |
+|  42  |    [1m831.04[0m    |     160.98    |      96     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  6  |
+|  43  |    [1m740.23[0m    |     174.02    |      80     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  5  |
+|  44  |    [1m739.98[0m    |     181.98    |      80     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  5  |
+|  45  |    [1m635.98[0m    |     189.37    |      64     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  4  |
+|  46  |    [1m500.07[0m    |     191.57    |      48     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp1ep16 |  3  |
+|  47  |    [1m373.90[0m    |     202.05    |      32     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  2  |
+|  48  |    [1m372.87[0m    |     206.03    |      32     |   64 (64=4x16)   |    4     |      16      | 16 (=[4m1[0mx[4m1[0mx[4m16[0m) | tp[4m1[0mpp[4m1[0mdp[4m16[0metp8ep2  |  2  |
+|  49  |    [1m234.25[0m    |     243.61    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  4  |
+|  50  |    [1m230.94[0m    |     244.04    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  4  |
+|  51  |    [1m230.89[0m    |     247.49    |      4      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  4  |
+|  52  |    [1m222.69[0m    |     309.31    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  3  |
+|  53  |    [1m221.02[0m    |     312.73    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  3  |
+|  54  |    [1m220.62[0m    |     314.94    |      3      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  3  |
+|  55  |    [1m203.73[0m    |     424.65    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  2  |
+|  56  |    [1m202.11[0m    |     429.34    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  2  |
+|  57  |    [1m200.52[0m    |     431.73    |      2      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  2  |
+|  58  |    [1m174.60[0m    |     504.57    |      3      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1  |  3  |
+|  59  |    [1m174.35[0m    |     509.64    |      3      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp8ep1  |  3  |
+|  60  |    [1m173.15[0m    |     707.03    |      1      |   64 (64=16x4)   |    16    |      4       |  4 (=[4m4[0mx[4m1[0mx[4m1[0m)  |  tp[4m4[0mpp[4m1[0mdp[4m1[0metp4ep1  |  1  |
+|  61  |    [1m93.64[0m     |     757.61    |      1      |   64 (64=8x8)    |    8     |      8       |  8 (=[4m8[0mx[4m1[0mx[4m1[0m)  |  tp[4m8[0mpp[4m1[0mdp[4m1[0metp4ep2  |  1  |
++------+--------------+---------------+-------------+------------------+----------+--------------+--------------+--------------------+-----+
 ********************************************************************************
-INFO 2025-08-28 16:01:50,577 main.py:1051] Configuration completed in 422.33 seconds
+INFO 2025-08-29 18:15:10,498 main.py:1051] Configuration completed in 167.03 seconds

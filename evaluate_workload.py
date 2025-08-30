@@ -501,10 +501,10 @@ def evaluate_unified(
     )
     
     # Runtime configuration
-    # For unified mode with DP, the effective batch size per GPU is batch_size / dp
-    effective_batch_size = batch_size // dp if dp > 1 else batch_size
+    # The SDK handles batch distribution internally based on DP
+    # We should pass the full batch size, not divide it ourselves
     runtime_config = config.RuntimeConfig(
-        batch_size=effective_batch_size,
+        batch_size=batch_size,
         isl=isl,
         osl=osl,
         beam_width=1
@@ -595,8 +595,7 @@ def evaluate_unified(
         'model': model,
         'sol_mode': use_sol_mode,
         'system': system,
-        'batch_size': batch_size,  # Original batch size
-        'effective_batch_size': effective_batch_size,  # Per-GPU batch size
+        'batch_size': batch_size,  # Global batch size
         'dp': dp,  # Data parallelism factor
         'parallel': parallel  # Full parallel config
     }
@@ -888,10 +887,15 @@ def print_results(result: Dict[str, Any], verbose: bool = False):
         print(f"  System: {df['system'].iloc[0]}")
         print(f"  Total GPUs: {df['num_total_gpus'].iloc[0]}")
         print(f"  Parallel: {df['parallel'].iloc[0]}")
-        if 'batch_size' in result:
-            print(f"  Batch Size: {result['batch_size']} (per-GPU: {result['effective_batch_size']})")
-        else:
-            print(f"  Batch Size: {df['bs'].iloc[0]}")
+        print(f"  Batch Size: {result.get('batch_size', df['bs'].iloc[0])}")
+        
+        # Add note about replica deployment
+        if result.get('batch_size', 0) >= 128:
+            print("\n  Note: This evaluates a single 8-GPU instance.")
+            print("  AIConfigurator deploys 8 such replicas (64 GPUs total):")
+            print(f"    - Per-replica batch: {result.get('batch_size', 128) // 8} sequences")
+            print(f"    - Per-replica TTFT: ~{df['ttft'].iloc[0] / 8:.2f}ms (estimated)")
+            print("    - Aggregate throughput: 8x shown values")
     else:
         print("\nDisaggregated Configuration:")
         print(f"  Model: {df['model'].iloc[0]}")
