@@ -953,15 +953,6 @@ def print_operation_breakdown(result: Dict[str, Any]):
     if result['type'] == 'unified':
         # Unified breakdown
         if 'context_latency' in result:
-            print("\nContext Phase Operations:")
-            print_ops_table_with_utilization(
-                result['context_latency'],
-                result.get('context_sol', {}),
-                result.get('context_utilization', {}),
-                result.get('context_total_time', sum(result['context_latency'].values())),
-                result.get('sol_mode', False)
-            )
-            
             # Enhanced table with FLOPs and memory
             if 'context_op_details' in result:
                 print_enhanced_ops_table(
@@ -974,15 +965,6 @@ def print_operation_breakdown(result: Dict[str, Any]):
                 )
         
         if 'generation_latency' in result:
-            print("\nGeneration Phase Operations:")
-            print_ops_table_with_utilization(
-                result['generation_latency'],
-                result.get('generation_sol', {}),
-                result.get('generation_utilization', {}),
-                result.get('generation_total_time', sum(result['generation_latency'].values())),
-                result.get('sol_mode', False)
-            )
-            
             # Enhanced table with FLOPs and memory
             if 'generation_op_details' in result:
                 print_enhanced_ops_table(
@@ -996,15 +978,6 @@ def print_operation_breakdown(result: Dict[str, Any]):
     else:
         # Disaggregated breakdown
         if 'prefill_breakdown' in result:
-            print("\nPrefill Operations (per worker):")
-            print_ops_table_with_utilization(
-                result['prefill_breakdown'],
-                result.get('prefill_sol', {}),
-                result.get('prefill_utilization', {}),
-                result.get('prefill_total_time', sum(result['prefill_breakdown'].values())),
-                result.get('sol_mode', False)
-            )
-            
             # Enhanced table with FLOPs and memory
             if 'prefill_op_details' in result:
                 print_enhanced_ops_table(
@@ -1017,15 +990,6 @@ def print_operation_breakdown(result: Dict[str, Any]):
                 )
         
         if 'decode_breakdown' in result:
-            print("\nDecode Operations (per worker):")
-            print_ops_table_with_utilization(
-                result['decode_breakdown'],
-                result.get('decode_sol', {}),
-                result.get('decode_utilization', {}),
-                result.get('decode_total_time', sum(result['decode_breakdown'].values())),
-                result.get('sol_mode', False)
-            )
-            
             # Enhanced table with FLOPs and memory
             if 'decode_op_details' in result:
                 print_enhanced_ops_table(
@@ -1111,14 +1075,14 @@ def print_enhanced_ops_table(ops_dict: Dict[str, float], ops_details: Dict[str, 
     # Get number of layers if available to show per-layer metrics
     num_layers = getattr(model, '_num_layers', 1) if model else 1
     
-    print(f"\n  Enhanced {phase.capitalize()} Operations Breakdown (Per Layer Metrics):")
+    print(f"\n  {phase.capitalize()} Operations Breakdown:")
     if sol_mode:
         # For SOL mode, we show theoretical peak performance required/achieved
-        print(f"  {'Operation':<28} {'Shape':<40} {'SOL Time/L(us)':>14} {'FLOPs/L':>10} {'Mem(MB)/L':>10} {'Achieved TFLOPS':>15} {'Achieved GB/s':>13}")
-        print("  " + "-"*144)
-    else:
-        print(f"  {'Operation':<28} {'Shape':<35} {'Time/L(ms)':>10} {'%Time':>7} {'FLOPs/L':>10} {'Mem(MB)/L':>10} {'Ach.TFLOPS':>11} {'Ach.GB/s':>10} {'CompUtil%':>10} {'MemUtil%':>9}")
+        print(f"  {'Operation':<28} {'Calls':>6} {'SOL Time/L(us)':>14} {'Total Time(us)':>14} {'%Time':>7} {'FLOPs/L':>10} {'Mem(MB)/L':>10} {'Achieved TFLOPS':>15} {'Achieved GB/s':>13} {'Shape':<40}")
         print("  " + "-"*180)
+    else:
+        print(f"  {'Operation':<28} {'Calls':>6} {'Time/L(ms)':>10} {'Total Time(ms)':>14} {'%Time':>7} {'FLOPs/L':>10} {'Mem(MB)/L':>10} {'Ach.TFLOPS':>11} {'Ach.GB/s':>10} {'CompUtil%':>10} {'MemUtil%':>9} {'Shape':<35}")
+        print("  " + "-"*216)
     
     # Separate system overhead from operations
     system_overhead = ops_dict.get('system_overhead', 0)
@@ -1139,15 +1103,17 @@ def print_enhanced_ops_table(ops_dict: Dict[str, float], ops_details: Dict[str, 
             flops = details.get('flops', 0)
             mem_bytes = details.get('memory_bytes', 0)
             
-            # Calculate per-layer metrics for ALL operations
+            # Calculate per-layer metrics and invoke times for ALL operations
             # Most operations happen per layer, except logits and embedding
             if any(x in op_name.lower() for x in ['logits_gemm', 'embedding']):
                 # These operations happen only once (not per layer)
+                invoke_times = 1
                 per_layer_time = op_time
                 per_layer_flops = flops
                 per_layer_mem = mem_bytes
             else:
                 # All other ops (including router_gemm, dispatch) happen per layer
+                invoke_times = num_layers
                 per_layer_time = op_time / num_layers if num_layers > 1 else op_time
                 per_layer_flops = flops / num_layers if num_layers > 1 else flops
                 per_layer_mem = mem_bytes / num_layers if num_layers > 1 else mem_bytes
@@ -1199,38 +1165,50 @@ def print_enhanced_ops_table(ops_dict: Dict[str, float], ops_details: Dict[str, 
             else:
                 op_display = op_name
             
+            # Calculate total time for this operation
+            total_op_time = op_time  # This is already the total time across all invocations
+            
             if sol_mode:
-                # In SOL mode, time IS the SOL time, show achieved/required performance (no %Time)
+                # In SOL mode, time IS the SOL time, show achieved/required performance
                 # Display time in microseconds
                 per_layer_time_us = per_layer_time * 1000  # Convert ms to us
-                print(f"  {op_display:<28} {shape_str:<40} {per_layer_time_us:>14.1f} {flops_str:>10} {mem_str:>10} {achieved_tflops_str:>15} {achieved_gb_s_str:>13}")
+                total_op_time_us = total_op_time * 1000  # Convert ms to us
+                print(f"  {op_display:<28} {invoke_times:>6} {per_layer_time_us:>14.1f} {total_op_time_us:>14.1f} {percentage:>6.1f}% {flops_str:>10} {mem_str:>10} {achieved_tflops_str:>15} {achieved_gb_s_str:>13} {shape_str:<40}")
             else:
-                print(f"  {op_display:<28} {shape_str:<35} {per_layer_time:>10.3f} {percentage:>6.1f}% {flops_str:>10} {mem_str:>10} {achieved_tflops_str:>11} {achieved_gb_s_str:>10} {comp_util:>9.1f}% {mem_util:>8.1f}%")
+                print(f"  {op_display:<28} {invoke_times:>6} {per_layer_time:>10.3f} {total_op_time:>14.3f} {percentage:>6.1f}% {flops_str:>10} {mem_str:>10} {achieved_tflops_str:>11} {achieved_gb_s_str:>10} {comp_util:>9.1f}% {mem_util:>8.1f}% {shape_str:<35}")
     
     # Add system overhead if present
     if system_overhead > 0:
         percentage = (system_overhead / total_time * 100) if total_time > 0 else 0
         if sol_mode:
             system_overhead_us = system_overhead * 1000  # Convert ms to us
-            print(f"  {'[System Overhead]':<28} {'N/A':<40} {system_overhead_us:>14.1f} {'N/A':>10} {'N/A':>10} {'N/A':>15} {'N/A':>13}")
+            print(f"  {'[System Overhead]':<28} {'N/A':>6} {'N/A':>14} {system_overhead_us:>14.1f} {percentage:>6.1f}% {'N/A':>10} {'N/A':>10} {'N/A':>15} {'N/A':>13} {'N/A':<40}")
         else:
-            print(f"  {'[System Overhead]':<28} {'N/A':<35} {system_overhead:>10.3f} {percentage:>6.1f}% {'N/A':>10} {'N/A':>10} {'N/A':>11} {'N/A':>10} {'N/A':>10} {'N/A':>9}")
+            print(f"  {'[System Overhead]':<28} {'N/A':>6} {'N/A':>10} {system_overhead:>14.3f} {percentage:>6.1f}% {'N/A':>10} {'N/A':>10} {'N/A':>11} {'N/A':>10} {'N/A':>10} {'N/A':>9} {'N/A':<35}")
     
     if sol_mode:
-        print("  " + "-"*144)
-        # Total row (no %Time for SOL mode)
+        print("  " + "-"*180)
+        # Total row
         total_flops_str = f"{total_flops/1e9:.1f}G" if total_flops > 0 else "N/A"
         ops_sum = sum(ops_without_overhead.values())
         ops_sum_us = ops_sum * 1000  # Convert ms to us
-        print(f"  {'Operations Total':<28} {'':<40} {ops_sum_us:>14.1f} {total_flops_str:>10} {total_mem_mb:>10.1f} {'':<15} {'':<13}")
+        ops_percentage = (ops_sum / total_time * 100) if total_time > 0 else 0
+        
+        # Calculate achieved TFLOPS and GB/s for operations total
+        total_achieved_tflops = (total_flops / 1e12) / (ops_sum / 1000) if ops_sum > 0 else 0
+        total_achieved_gb_s = (total_mem_mb / 1e3) / (ops_sum / 1000) if ops_sum > 0 else 0  # MB to GB, ms to s
+        total_achieved_tflops_str = f"{total_achieved_tflops:.2f}" if total_achieved_tflops > 0 else ""
+        total_achieved_gb_s_str = f"{total_achieved_gb_s:.1f}" if total_achieved_gb_s > 0 else ""
+        
+        print(f"  {'Operations Total':<28} {'':<6} {'':<14} {ops_sum_us:>14.1f} {ops_percentage:>6.1f}% {total_flops_str:>10} {total_mem_mb:>10.1f} {total_achieved_tflops_str:>15} {total_achieved_gb_s_str:>13} {'':<40}")
         if system_overhead > 0:
             total_time_us = total_time * 1000  # Convert ms to us
-            print(f"  {'TOTAL (TTFT/TPOT)':<28} {'':<40} {total_time_us:>14.1f} {'':<10} {'':<10} {'':<15} {'':<13}")
+            print(f"  {'TOTAL (TTFT/TPOT)':<28} {'':<6} {'':<14} {total_time_us:>14.1f} {'100.0%':>7} {'':<10} {'':<10} {'':<15} {'':<13} {'':<40}")
     else:
-        print("  " + "-"*180)
+        print("  " + "-"*216)
         # Total row (showing cumulative values)
         total_flops_str = f"{total_flops/1e9:.1f}G" if total_flops > 0 else "N/A"
-        print(f"  {'TOTAL (all layers)':<28} {'':<35} {total_time:>10.3f} {100.0:>6.1f}% {total_flops_str:>10} {total_mem_mb:>10.1f} {'':<11} {'':<10} {'':<10} {'':<9}")
+        print(f"  {'TOTAL (all layers)':<28} {'':<6} {'':<10} {total_time:>14.3f} {'100.0%':>7} {total_flops_str:>10} {total_mem_mb:>10.1f} {'':<11} {'':<10} {'':<10} {'':<9} {'':<35}")
 
 
 def main():
