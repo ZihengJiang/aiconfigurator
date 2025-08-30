@@ -1,7 +1,6 @@
- python evaluate_workload.py \
+ python evaluate_disagg.py \
     --model DEEPSEEK_V3 \
     --system gb200_nvl72 \
-    --disagg \
     --prefill-workers 12 \
     --prefill-parallel tp4pp1dp1etp4ep1 \
     --prefill-bs 1 \

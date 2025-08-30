@@ -130,8 +130,9 @@ class MoE(Operation):
         self._workload_distribution = workload_distribution
         self._weights = self._hidden_size*self._inter_size*self._num_experts*quant_mode.value.memory*3 // self._moe_ep_size // self._moe_tp_size # 3 for ffn1,gate,ffn2; 2 for float16
     def query(self, database:PerfDatabase, **kwargs):
-        # attention dp size will scale up the total input tokens. 
-        x = kwargs.get('x') * self._attention_dp_size
+        # With attention DP, each GPU processes only its portion of tokens
+        # The x passed in is already the per-GPU token count (batch_size * isl)
+        x = kwargs.get('x')
         overwrite_quant_mode = kwargs.get('quant_mode', None)
         quant_mode = self._quant_mode if overwrite_quant_mode is None else overwrite_quant_mode
         return database.query_moe(num_tokens=x, 

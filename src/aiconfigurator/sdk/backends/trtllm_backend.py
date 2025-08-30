@@ -285,6 +285,8 @@ class TRTLLMBackend(BaseBackend):
             weights += op.get_weights()
         
         # count weights on a single GPU
+        # Weights are divided by PP (pipeline parallel) but not by DP (data parallel)
+        # because in DP, all GPUs hold the same weights
         weights /= model.config.pp_size
         
         h = model._num_heads*model._head_size
@@ -308,7 +310,8 @@ class TRTLLMBackend(BaseBackend):
             c_dict = {1:22, 2:13, 4:10, 8:10}
             activations = 2*num_tokens*h*c_dict[min(model.config.tp_size, 8)]
             # moe workspace, 128 for block scale, float for 4bytes
-            activations += num_tokens * h * model.config.attention_dp_size * model._num_experts * model._topk \
+            # Note: attention_dp_size should not multiply the workspace - it's per GPU
+            activations += num_tokens * h * model._num_experts * model._topk \
                 /model.config.moe_ep_size / 128 * 4 # still an improvement opportunity in trtllm to achieve this.
             # nextn correction for ds only, MTP
             if model.config.nextn > 0:
@@ -319,6 +322,12 @@ class TRTLLMBackend(BaseBackend):
             activations = 2*num_tokens*h*c_dict[min(model.config.tp_size, 8)]
             activations = max(activations, 70*1024*1024) # minimum act
         # ==== this above section is backend specific ====
+        
+        # Activations are distributed across DP dimension
+        # Each GPU only processes batch_size/attention_dp_size sequences
+        # So activation memory should be divided by attention_dp_size
+        if model.config.attention_dp_size > 1:
+            activations = activations / model.config.attention_dp_size
 
         if get_model_family(model.model_name) == 'DEEPSEEK':
             kvcache_per_token = model._num_layers*576
@@ -326,9 +335,9 @@ class TRTLLMBackend(BaseBackend):
             num_kv_heads_per_GPU = (model._num_kv_heads+model.config.tp_size-1)//model.config.tp_size
             kvcache_per_token = num_kv_heads_per_GPU*model._head_size*model._num_layers*2
         # should not be divided by pp_size as you need to hold all kvcache for stages.
-        kvcache = (batch_size*isl+batch_size*beam_width*osl)*model.config.kvcache_quant_mode.value.memory*kvcache_per_token
-        #if 'DEEPSEEK' in model.model_name or 'MOE' in model.model_name:
-        #    kvcache = kvcache * model.config.attention_dp_size # this is incorrect. tp will duplicate the kvcache while attn_dp will not.
+        # KV cache is also distributed across DP dimension - each GPU only handles its portion of sequences
+        effective_batch_size = batch_size // model.config.attention_dp_size if model.config.attention_dp_size > 1 else batch_size
+        kvcache = (effective_batch_size*isl+effective_batch_size*beam_width*osl)*model.config.kvcache_quant_mode.value.memory*kvcache_per_token
 
         # starting from 2.22
         nccl_mem = database.system_spec['misc']['nccl_mem'][min(model.config.tp_size, 8)]

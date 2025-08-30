@@ -501,10 +501,11 @@ def evaluate_unified(
     )
     
     # Runtime configuration
-    # The SDK handles batch distribution internally based on DP
-    # We should pass the full batch size, not divide it ourselves
+    # IMPORTANT: With DP, each GPU processes batch_size/dp sequences
+    # The SDK's SOL calculations expect the per-GPU batch size
+    effective_batch_size = batch_size // dp if dp > 1 else batch_size
     runtime_config = config.RuntimeConfig(
-        batch_size=batch_size,
+        batch_size=effective_batch_size,
         isl=isl,
         osl=osl,
         beam_width=1
@@ -596,6 +597,7 @@ def evaluate_unified(
         'sol_mode': use_sol_mode,
         'system': system,
         'batch_size': batch_size,  # Global batch size
+        'effective_batch_size': effective_batch_size,  # Per-GPU batch size
         'dp': dp,  # Data parallelism factor
         'parallel': parallel  # Full parallel config
     }
@@ -694,7 +696,8 @@ def evaluate_disaggregated(
     logger.info("Evaluating prefill component...")
     prefill_model = models.get_model(model_name, prefill_model_config)
     prefill_session = InferenceSession(model=prefill_model, database=database, backend=backend)
-    prefill_runtime = config.RuntimeConfig(batch_size=prefill_config['batch_size'], isl=isl, osl=osl, beam_width=1)
+    # For prefill, we evaluate with osl=1 since it only processes context
+    prefill_runtime = config.RuntimeConfig(batch_size=prefill_config['batch_size'], isl=isl, osl=1, beam_width=1)
     prefill_summary = prefill_session.run_static(prefill_runtime, mode='static_ctx')
     
     logger.info("Evaluating decode component...")
@@ -741,6 +744,23 @@ def evaluate_disaggregated(
     
     if hasattr(prefill_summary, '_memory') and prefill_summary._memory:
         memory_info['prefill'] = prefill_summary._memory.copy()
+        # Fix KV cache calculation for prefill workers
+        # Prefill workers process context and need temporary KV cache for the full context
+        # The backend calculates with osl=1 which underestimates the KV cache
+        if 'kvcache' in memory_info['prefill'] and model_name == 'DEEPSEEK_V3':
+            # For DEEPSEEK_V3: kvcache_per_token = 61 layers * 576 = 35136
+            kvcache_per_token = 61 * 576  # DEEPSEEK specific
+            kvcache_bytes = 1 if 'fp8' in str(prefill_model_config.kvcache_quant_mode).lower() else 2
+            # Prefill processes batch_size sequences with isl tokens each
+            # No need to divide by DP since prefill has DP=1
+            actual_kvcache_gb = (prefill_config['batch_size'] * isl * kvcache_per_token * kvcache_bytes) / (1024**3)
+            memory_info['prefill']['kvcache'] = actual_kvcache_gb
+            # Recalculate total
+            memory_info['prefill']['total'] = (memory_info['prefill'].get('weights', 0) + 
+                                               memory_info['prefill'].get('activations', 0) + 
+                                               actual_kvcache_gb +
+                                               memory_info['prefill'].get('nccl', 0) +
+                                               memory_info['prefill'].get('others', 0))
     elif 'memory' in prefill_df.columns:
         memory_info['prefill'] = {'total': float(prefill_df['memory'].iloc[0])}
     
@@ -1276,18 +1296,13 @@ Examples:
     parser.add_argument('--isl', type=int, default=128, help='Input sequence length')
     parser.add_argument('--osl', type=int, default=128, help='Output sequence length')
     
-    # Unified configuration
-    parser.add_argument('--parallel', help='Parallel configuration for unified mode')
-    parser.add_argument('--batch-size', type=int, help='Batch size for unified mode')
-    
-    # Disaggregated configuration
-    parser.add_argument('--disagg', action='store_true', help='Use disaggregated configuration')
-    parser.add_argument('--prefill-workers', type=int, help='Number of prefill workers')
-    parser.add_argument('--prefill-parallel', help='Prefill parallel configuration')
-    parser.add_argument('--prefill-bs', type=int, help='Prefill batch size')
-    parser.add_argument('--decode-workers', type=int, help='Number of decode workers')
-    parser.add_argument('--decode-parallel', help='Decode parallel configuration')
-    parser.add_argument('--decode-bs', type=int, help='Decode batch size')
+    # Disaggregated configuration (required)
+    parser.add_argument('--prefill-workers', type=int, required=True, help='Number of prefill workers')
+    parser.add_argument('--prefill-parallel', required=True, help='Prefill parallel configuration')
+    parser.add_argument('--prefill-bs', type=int, required=True, help='Prefill batch size')
+    parser.add_argument('--decode-workers', type=int, required=True, help='Number of decode workers')
+    parser.add_argument('--decode-parallel', required=True, help='Decode parallel configuration')
+    parser.add_argument('--decode-bs', type=int, required=True, help='Decode batch size')
     
     # Quantization
     parser.add_argument('--quant', help='Quantization config (e.g., gemm=fp8_ootb,kvcache=fp8)')
@@ -1309,50 +1324,29 @@ Examples:
             quant_config[key] = value
     
     try:
-        if args.disagg:
-            # Disaggregated mode
-            if not all([args.prefill_workers, args.prefill_parallel, args.prefill_bs,
-                       args.decode_workers, args.decode_parallel, args.decode_bs]):
-                parser.error("Disaggregated mode requires all prefill and decode parameters")
-            
-            prefill_config = {
-                'workers': args.prefill_workers,
-                'parallel': args.prefill_parallel,
-                'batch_size': args.prefill_bs
-            }
-            decode_config = {
-                'workers': args.decode_workers,
-                'parallel': args.decode_parallel,
-                'batch_size': args.decode_bs
-            }
-            
-            result = evaluate_disaggregated(
-                model_name=args.model,
-                system=args.system,
-                prefill_config=prefill_config,
-                decode_config=decode_config,
-                isl=args.isl,
-                osl=args.osl,
-                backend_name=args.backend,
-                version=args.version,
-                quant_config=quant_config
-            )
-        else:
-            # Unified mode
-            if not all([args.parallel, args.batch_size]):
-                parser.error("Unified mode requires --parallel and --batch-size")
-            
-            result = evaluate_unified(
-                model_name=args.model,
-                system=args.system,
-                parallel=args.parallel,
-                batch_size=args.batch_size,
-                isl=args.isl,
-                osl=args.osl,
-                backend_name=args.backend,
-                version=args.version,
-                quant_config=quant_config
-            )
+        # Disaggregated mode only
+        prefill_config = {
+            'workers': args.prefill_workers,
+            'parallel': args.prefill_parallel,
+            'batch_size': args.prefill_bs
+        }
+        decode_config = {
+            'workers': args.decode_workers,
+            'parallel': args.decode_parallel,
+            'batch_size': args.decode_bs
+        }
+        
+        result = evaluate_disaggregated(
+            model_name=args.model,
+            system=args.system,
+            prefill_config=prefill_config,
+            decode_config=decode_config,
+            isl=args.isl,
+            osl=args.osl,
+            quant_config=quant_config,
+            backend_name=args.backend,
+            version=args.version
+        )
         
         # Print results
         print_results(result, verbose=args.verbose)
