@@ -757,7 +757,21 @@ class PerfDatabase(object):
             """
             Get the sol time, sol math and sol mem
             """
-            sol_math = 2 * m * n * k / (self.system_spec['gpu']['float16_tc_flops']*quant_mode.value.compute) * 1000
+            # Use appropriate FLOPS based on quantization mode
+            if quant_mode in [common.GEMMQuantMode.fp8, common.GEMMQuantMode.fp8_block, common.GEMMQuantMode.fp8_ootb]:
+                # FP8 quantization - use FP8 FLOPS
+                tc_flops = self.system_spec['gpu'].get('fp8_tc_flops', self.system_spec['gpu']['float16_tc_flops'])
+            elif quant_mode == common.GEMMQuantMode.nvfp4:
+                # NV FP4 on Blackwell - might have specific FLOPS, fallback to FP8
+                tc_flops = self.system_spec['gpu'].get('fp8_tc_flops', self.system_spec['gpu']['float16_tc_flops'])
+            elif quant_mode in [common.GEMMQuantMode.int8_wo, common.GEMMQuantMode.sq]:
+                # INT8 - use INT8 FLOPS if available
+                tc_flops = self.system_spec['gpu'].get('int8_tc_flops', self.system_spec['gpu']['float16_tc_flops'])
+            else:
+                # FP16 or INT4 weight-only
+                tc_flops = self.system_spec['gpu']['float16_tc_flops']
+            
+            sol_math = 2 * m * n * k / (tc_flops * quant_mode.value.compute) * 1000
             sol_mem = quant_mode.value.memory * (m * n + m * k + n * k) / self.system_spec['gpu']['mem_bw'] * 1000
             sol_time = max(sol_math, sol_mem)
             return sol_time, sol_math, sol_mem
@@ -789,6 +803,7 @@ class PerfDatabase(object):
         def get_sol(b : int, s : int, n : int, n_kv : int, kvcache_quant_mode : common.KVCacheQuantMode, fmha_quant_mode : common.FMHAQuantMode) -> Tuple[float, float, float]:
             """
             Get the sol time, sol math and sol mem
+            Note: n and n_kv are per-GPU heads (already divided by TP)
             """
             ops = 2 * b * s * s * n * 128 * 2 / 2 # 2 for fma, 2 for q*k^t+*v, 2 for causality.
             mem_bytes = 2 * b * (n*s*128 + 2*n_kv*s*128 + n*s*128) # 2 for fp16 TODO
@@ -832,10 +847,13 @@ class PerfDatabase(object):
         def get_sol(b : int, s : int, n : int, n_kv : int, kvcache_quant_mode : common.KVCacheQuantMode) -> Tuple[float, float, float]:
             """
             Get the sol time, sol math and sol mem
+            Note: n and n_kv are per-GPU heads (already divided by TP)
             """
             # only consider fp16 mmha
-            ops = 2 * b * n * 128 * 2 # 2 for fma, 2 for q*k^t+*v
+            # For generation, we compute attention of new tokens against s-1 cached positions
+            ops = 2 * b * n * 128 * s * 2 # 2 for fma, 2 for q*k^t+*v, s for sequence length
             # kvcache load bytes will depend on kvcache quant. while input q and output might be in fp16.
+            # Note: kvcache_quant_mode.value.memory is 1 for FP8, 2 for FP16
             mem_bytes = b * (n*128*2 + 2*n_kv*(s-1)*128*kvcache_quant_mode.value.memory + n*128*2)
             
             sol_math = ops / self.system_spec['gpu']['float16_tc_flops'] * 1000
@@ -1087,7 +1105,18 @@ class PerfDatabase(object):
             mem_bytes = quant_mode.value.memory * (total_tokens * hidden_size * 3 # input+output
                                                                         + total_tokens * inter_size * 3 // moe_tp_size # intermediate, assume ffn1/gate all need to write results.
                                                                         + hidden_size * inter_size * 3 // moe_tp_size * min(num_experts//moe_ep_size, total_tokens))
-            sol_math = ops / (self.system_spec['gpu']['float16_tc_flops']*quant_mode.value.compute) * 1000
+            # Use appropriate FLOPS based on quantization mode
+            if quant_mode in [common.MoEQuantMode.fp8, common.MoEQuantMode.fp8_block, common.MoEQuantMode.w4afp8]:
+                # FP8 or mixed precision with FP8 activations - use FP8 FLOPS
+                tc_flops = self.system_spec['gpu'].get('fp8_tc_flops', self.system_spec['gpu']['float16_tc_flops'])
+            elif quant_mode == common.MoEQuantMode.nvfp4:
+                # NV FP4 on Blackwell - might have specific FLOPS, fallback to FP8
+                tc_flops = self.system_spec['gpu'].get('fp8_tc_flops', self.system_spec['gpu']['float16_tc_flops'])
+            else:
+                # FP16 or INT4 weight-only
+                tc_flops = self.system_spec['gpu']['float16_tc_flops']
+            
+            sol_math = ops / (tc_flops * quant_mode.value.compute) * 1000
             sol_mem = mem_bytes / self.system_spec['gpu']['mem_bw'] * 1000
             sol_time = max(sol_math, sol_mem)
             return sol_time, sol_math, sol_mem
