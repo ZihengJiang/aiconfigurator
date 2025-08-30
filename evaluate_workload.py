@@ -501,8 +501,10 @@ def evaluate_unified(
     )
     
     # Runtime configuration
+    # For unified mode with DP, the effective batch size per GPU is batch_size / dp
+    effective_batch_size = batch_size // dp if dp > 1 else batch_size
     runtime_config = config.RuntimeConfig(
-        batch_size=batch_size,
+        batch_size=effective_batch_size,
         isl=isl,
         osl=osl,
         beam_width=1
@@ -540,6 +542,13 @@ def evaluate_unified(
         memory_info['oom_status'] = summary.check_oom()
     elif 'memory' in df.columns:
         memory_info = {'total': float(df['memory'].iloc[0]), 'oom_status': summary.check_oom()}
+    
+    # If still empty, try to get from summary methods
+    if not memory_info and hasattr(summary, 'get_memory_consumption'):
+        mem_dict = summary.get_memory_consumption()
+        if mem_dict:
+            memory_info = mem_dict
+            memory_info['oom_status'] = summary.check_oom()
     
     # Get operation latencies - use SOL if needed
     if use_sol_mode:
@@ -585,7 +594,11 @@ def evaluate_unified(
         'is_oom': summary.check_oom(),
         'model': model,
         'sol_mode': use_sol_mode,
-        'system': system
+        'system': system,
+        'batch_size': batch_size,  # Original batch size
+        'effective_batch_size': effective_batch_size,  # Per-GPU batch size
+        'dp': dp,  # Data parallelism factor
+        'parallel': parallel  # Full parallel config
     }
 
 
@@ -875,7 +888,10 @@ def print_results(result: Dict[str, Any], verbose: bool = False):
         print(f"  System: {df['system'].iloc[0]}")
         print(f"  Total GPUs: {df['num_total_gpus'].iloc[0]}")
         print(f"  Parallel: {df['parallel'].iloc[0]}")
-        print(f"  Batch Size: {df['bs'].iloc[0]}")
+        if 'batch_size' in result:
+            print(f"  Batch Size: {result['batch_size']} (per-GPU: {result['effective_batch_size']})")
+        else:
+            print(f"  Batch Size: {df['bs'].iloc[0]}")
     else:
         print("\nDisaggregated Configuration:")
         print(f"  Model: {df['model'].iloc[0]}")
@@ -896,7 +912,7 @@ def print_results(result: Dict[str, Any], verbose: bool = False):
     
     # Memory consumption details
     if 'memory_info' in result:
-        print_memory_info(result['memory_info'])
+        print_memory_info(result)
     
     # Operation breakdown
     if 'context_latency' in result or 'prefill_breakdown' in result:
@@ -911,11 +927,17 @@ def print_results(result: Dict[str, Any], verbose: bool = False):
     print("="*80)
 
 
-def print_memory_info(memory_info: Dict[str, Any]):
+def print_memory_info(result: Dict[str, Any]):
     """Print memory consumption details."""
+    memory_info = result.get('memory_info', {})
+    
     print("\n" + "-"*60)
     print("MEMORY CONSUMPTION")
     print("-"*60)
+    
+    if not memory_info:
+        print("  No memory information available")
+        return
     
     if 'prefill' in memory_info and 'decode' in memory_info:
         # Disaggregated memory info
@@ -936,9 +958,17 @@ def print_memory_info(memory_info: Dict[str, Any]):
         print(f"  Total GPU Memory Used: {total_mem:.2f} GB")
     else:
         # Unified memory info
+        # Check if we have DP info to scale memory
+        num_gpus = result.get('dp', 1) if 'dp' in result else 1
+        if result['type'] == 'unified' and num_gpus > 1:
+            print(f"  Per-GPU Memory:")
         for key, value in memory_info.items():
             if key != 'oom_status':
-                print(f"  {key:30}: {value:>10.3f} GB")
+                print(f"    {key:28}: {value:>10.3f} GB")
+        
+        if num_gpus > 1:
+            total_memory = memory_info.get('total', 0) * num_gpus
+            print(f"\n  Total System Memory (all {num_gpus} GPUs): {total_memory:>10.3f} GB")
         
         if 'oom_status' in memory_info:
             print(f"\n  OOM Status: {'Yes' if memory_info['oom_status'] else 'No'}")
